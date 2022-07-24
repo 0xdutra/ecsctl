@@ -37,15 +37,8 @@ var createClusterCmd = &cobra.Command{
 	Run:   createClusterRun,
 }
 
-var (
-	clusterName string
-)
-
 func init() {
 	clusterCmd.AddCommand(createClusterCmd)
-
-	clusterCmd.PersistentFlags().StringVarP(&clusterName, "name", "n", "default", "The name of the ECS cluster")
-	clusterCmd.MarkFlagRequired("name")
 }
 
 func createClusterRun(cmd *cobra.Command, _ []string) {
