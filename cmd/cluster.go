@@ -31,11 +31,16 @@ POSSIBILITY OF SUCH DAMAGE.
 package cmd
 
 import (
+	"os"
+
 	"github.com/spf13/cobra"
 )
 
 func clusterRun(cmd *cobra.Command, args []string) {
-	cmd.Help()
+	err := cmd.Help()
+	if err != nil {
+		os.Exit(1)
+	}
 }
 
 var (
@@ -51,5 +56,4 @@ var clusterCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(clusterCmd)
 	clusterCmd.PersistentFlags().StringVarP(&clusterName, "name", "n", "default", "The name of the ECS cluster")
-	clusterCmd.MarkFlagRequired("name")
 }
