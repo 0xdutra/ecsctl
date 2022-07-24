@@ -38,6 +38,10 @@ func clusterRun(cmd *cobra.Command, args []string) {
 	cmd.Help()
 }
 
+var (
+	clusterName string
+)
+
 var clusterCmd = &cobra.Command{
 	Use:   "cluster",
 	Short: "Commands to manage ECS cluster",
@@ -46,4 +50,6 @@ var clusterCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(clusterCmd)
+	clusterCmd.PersistentFlags().StringVarP(&clusterName, "name", "n", "default", "The name of the ECS cluster")
+	clusterCmd.MarkFlagRequired("name")
 }
