@@ -26,6 +26,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 
 	"github.com/aws/aws-sdk-go/service/ecs"
@@ -49,19 +50,26 @@ func createTaskdefinitionRun(cmd *cobra.Command, _ []string) {
 
 	taskFile, err := os.Open(taskJsonInput)
 	if err != nil {
-		fmt.Println(err)
+		log.Panic(err)
 	}
 
 	defer taskFile.Close()
 
-	rawTaskInput, _ := ioutil.ReadAll(taskFile)
+	rawTaskInput, err := ioutil.ReadAll(taskFile)
+	if err != nil {
+		log.Panic(err)
+	}
 
 	var taskInput ecs.RegisterTaskDefinitionInput
-	json.Unmarshal([]byte(rawTaskInput), &taskInput)
+
+	err = json.Unmarshal([]byte(rawTaskInput), &taskInput)
+	if err != nil {
+		log.Panic(err)
+	}
 
 	result, err := svc.RegisterTaskDefinition(&taskInput)
 	if err != nil {
-		fmt.Println(err)
+		log.Panic(err)
 	}
 
 	fmt.Println(result)
