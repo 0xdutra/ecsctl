@@ -23,11 +23,11 @@ package cmd
 
 import (
 	"ecsctl/pkg/provider"
+	"encoding/json"
 	"fmt"
-	"strings"
+	"io/ioutil"
+	"os"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/spf13/cobra"
 )
@@ -35,7 +35,7 @@ import (
 // createTaskdefinitionCmd represents the createTaskdefinition command
 var createTaskdefinitionCmd = &cobra.Command{
 	Use:   "create-task-definition",
-	Short: "Commands to create task definition",
+	Short: "Create task definition using JSON file",
 	Run:   createTaskdefinitionRun,
 }
 
@@ -43,60 +43,26 @@ func init() {
 	taskDefinitionCmd.AddCommand(createTaskdefinitionCmd)
 }
 
-func parserLogOptions(logOptions *string) map[string]*string {
-	newStr := strings.Split(*logOptions, "&")
-	options := make(map[string]*string)
-
-	for _, pair := range newStr {
-		z := strings.Split(pair, "=")
-		options[z[0]] = &z[1]
-	}
-
-	return options
-}
-
 func createTaskdefinitionRun(cmd *cobra.Command, _ []string) {
 	sess := provider.NewSession()
 	svc := ecs.New(sess)
 
-	input := &ecs.RegisterTaskDefinitionInput{
-
-		ContainerDefinitions: []*ecs.ContainerDefinition{
-			{
-				Cpu:       aws.Int64(cpu),
-				Essential: aws.Bool(true),
-				Image:     aws.String(image),
-				Memory:    aws.Int64(memory),
-				Name:      aws.String(name),
-				LogConfiguration: &ecs.LogConfiguration{
-					LogDriver: aws.String(logDriver),
-					Options:   parserLogOptions(&logOptions),
-				},
-			},
-		},
-		Family:      aws.String(family),
-		TaskRoleArn: aws.String(taskRoleArn),
+	taskFile, err := os.Open(taskJsonInput)
+	if err != nil {
+		fmt.Println(err)
 	}
 
-	result, err := svc.RegisterTaskDefinition(input)
+	defer taskFile.Close()
+
+	rawTaskInput, _ := ioutil.ReadAll(taskFile)
+
+	var taskInput ecs.RegisterTaskDefinitionInput
+	json.Unmarshal([]byte(rawTaskInput), &taskInput)
+
+	result, err := svc.RegisterTaskDefinition(&taskInput)
 	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			case ecs.ErrCodeServerException:
-				fmt.Println(ecs.ErrCodeServerException, aerr.Error())
-			case ecs.ErrCodeClientException:
-				fmt.Println(ecs.ErrCodeClientException, aerr.Error())
-			case ecs.ErrCodeInvalidParameterException:
-				fmt.Println(ecs.ErrCodeInvalidParameterException, aerr.Error())
-			default:
-				fmt.Println(aerr.Error())
-			}
-		} else {
-			fmt.Println(err.Error())
-		}
-		return
+		fmt.Println(err)
 	}
 
 	fmt.Println(result)
-
 }

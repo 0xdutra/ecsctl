@@ -42,24 +42,10 @@ var taskDefinitionCmd = &cobra.Command{
 }
 
 var (
-	cpu         int64
-	image       string
-	memory      int64
-	name        string
-	family      string
-	logDriver   string
-	logOptions  string
-	taskRoleArn string
+	taskJsonInput string
 )
 
 func init() {
 	rootCmd.AddCommand(taskDefinitionCmd)
-
-	rootCmd.PersistentFlags().Int64VarP(&cpu, "cpu", "", 10, "The number of CPU units used by the task")
-	rootCmd.PersistentFlags().StringVarP(&image, "image", "", "", "The image used to start a container")
-	rootCmd.PersistentFlags().Int64VarP(&memory, "memory", "", 10, "The number of memory units used by the task")
-	rootCmd.PersistentFlags().StringVarP(&name, "name", "", "", "The name of the container")
-	rootCmd.PersistentFlags().StringVarP(&family, "family", "", "", "The family and revision (family:revision) or full ARN of the task definition")
-	rootCmd.PersistentFlags().StringVarP(&logDriver, "log-driver", "", "", "The log driver to use for the container")
-	rootCmd.PersistentFlags().StringVarP(&logOptions, "log-options", "", "", "The options to log driver")
+	rootCmd.PersistentFlags().StringVarP(&taskJsonInput, "input-json", "", "", "The options to log driver")
 }
