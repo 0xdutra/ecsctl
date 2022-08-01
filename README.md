@@ -17,11 +17,14 @@
 
 <hr>
 
-### Commands available
+### All commands available
 
 ```sh
-cluster - Commands to manage ECS clusters
+cluster         - Commands to manage ECS clusters
+task-definition - Commands to manage task definitions
 ```
+
+<hr>
 
 ### cluster subcommands
 
@@ -31,9 +34,24 @@ delete-cluster - Delete ECS cluster
 list-clusters  - List all ECS clusters
 ```
 
-### Examples
+### cluster examples
 
 ```sh
 ecsctl cluster create-cluster --name example01
 ecsctl cluster delete-cluster --name example01
 ```
+
+<hr>
+
+### task definition subcommands
+
+```sh
+create-task-definition - Create task definition
+```
+
+### task definition examples
+
+```sh
+ecsctl task-definition create-task-definition --input-json examples/task_definition_example.json
+```
+
