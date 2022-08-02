@@ -88,7 +88,11 @@ func editTaskdefinitionRun(cmd *cobra.Command, _ []string) {
 	editorCommand := exec.Command(editor, tmpTaskDefinitionFile)
 	editorCommand.Stdin = os.Stdin
 	editorCommand.Stdout = os.Stdout
-	editorCommand.Run()
+
+	err = editorCommand.Run()
+	if err != nil {
+		log.Panic(err)
+	}
 
 	readTmpTaskDefinitionFile, err := os.Open(tmpTaskDefinitionFile)
 	if err != nil {
