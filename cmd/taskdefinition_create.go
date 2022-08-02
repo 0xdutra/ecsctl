@@ -40,8 +40,13 @@ var createTaskdefinitionCmd = &cobra.Command{
 	Run:   createTaskdefinitionRun,
 }
 
+var (
+	taskJsonInput string
+)
+
 func init() {
 	taskDefinitionCmd.AddCommand(createTaskdefinitionCmd)
+	taskDefinitionCmd.PersistentFlags().StringVarP(&taskJsonInput, "input-json", "", "", "Input task definition with JSON format")
 }
 
 func createTaskdefinitionRun(cmd *cobra.Command, _ []string) {
