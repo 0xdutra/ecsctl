@@ -5,6 +5,7 @@
 *.so
 *.dylib
 ecsctl
+tmp_*
 
 # Test binary, built with `go test -c`
 *.test
