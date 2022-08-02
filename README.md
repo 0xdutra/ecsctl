@@ -47,6 +47,7 @@ ecsctl cluster delete-cluster --name example01
 
 ```sh
 create-task-definition - Create task definition
+edit-task-definition   - Edit a task definition using a text editor
 ```
 
 ### task definition examples
@@ -55,3 +56,6 @@ create-task-definition - Create task definition
 ecsctl task-definition create-task-definition --input-json examples/task_definition_example.json
 ```
 
+```sh
+ecsctl task-definition edit-task-definition --name ecsctl-apache-example --revision 1 --editor nano
+```
