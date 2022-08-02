@@ -47,5 +47,5 @@ var (
 
 func init() {
 	rootCmd.AddCommand(taskDefinitionCmd)
-	rootCmd.PersistentFlags().StringVarP(&taskJsonInput, "input-json", "", "", "The options to log driver")
+	rootCmd.PersistentFlags().StringVarP(&taskJsonInput, "input-json", "", "", "Input task definition with JSON format")
 }
