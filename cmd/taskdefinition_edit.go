@@ -30,6 +30,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/andreyvit/diff"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/spf13/cobra"
@@ -55,7 +56,11 @@ func init() {
 	taskDefinitionCmd.PersistentFlags().Int64VarP(&taskRevision, "revision", "", 1, "The revision of the task definition")
 }
 
-func editTaskdefinitionRun(cmd *cobra.Command, _ []string) {
+func createDiff(currentTaskDefinition string, editedTaskDefinition string) string {
+	return diff.LineDiff(currentTaskDefinition, editedTaskDefinition)
+}
+
+func getCurrentTaskDefinition(taskDefinitionName string, taskDefinitionRevision int64) *ecs.DescribeTaskDefinitionOutput {
 	sess := provider.NewSession()
 	svc := ecs.New(sess)
 
@@ -65,27 +70,49 @@ func editTaskdefinitionRun(cmd *cobra.Command, _ []string) {
 		TaskDefinition: aws.String(taskDefinitionWithRevision),
 	}
 
-	taskDefinition, err := svc.DescribeTaskDefinition(input)
+	currentTaskDefinition, err := svc.DescribeTaskDefinition(input)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	newTaskDefinitionJSON, _ := json.MarshalIndent(taskDefinition.TaskDefinition, "", "  ")
-	tmpTaskDefinitionFile := fmt.Sprintf("tmp_%s_%d.json", taskName, taskRevision)
+	return currentTaskDefinition
+}
 
-	newTaskDefinition, err := os.Create(tmpTaskDefinitionFile)
+func waitUserAcceptChanges() bool {
+	var resp string
+
+	fmt.Println("\nDo you want to make these changes?")
+	fmt.Println("ecsctl will create a new revision of the task definition.")
+	fmt.Println("Only 'yes' will be accepted to approve.")
+
+	fmt.Printf("Enter value: ")
+	fmt.Scanf("%s", &resp)
+
+	return resp == "yes"
+}
+
+func editTaskdefinitionRun(cmd *cobra.Command, _ []string) {
+	sess := provider.NewSession()
+	svc := ecs.New(sess)
+
+	currentTaskDefinition := getCurrentTaskDefinition(taskName, taskRevision)
+
+	currentTaskDefinitionJSON, _ := json.MarshalIndent(currentTaskDefinition.TaskDefinition, "", "  ")
+	editedTaskDefinitionFile := fmt.Sprintf("tmp_%s_%d.json", taskName, taskRevision)
+
+	newTaskDefinition, err := os.Create(editedTaskDefinitionFile)
 	if err != nil {
 		log.Panic(err)
 	}
 
 	defer newTaskDefinition.Close()
 
-	_, err = newTaskDefinition.WriteString(string(newTaskDefinitionJSON))
+	_, err = newTaskDefinition.WriteString(string(currentTaskDefinitionJSON))
 	if err != nil {
 		log.Panic(err)
 	}
 
-	editorCommand := exec.Command(editor, tmpTaskDefinitionFile)
+	editorCommand := exec.Command(editor, editedTaskDefinitionFile)
 	editorCommand.Stdin = os.Stdin
 	editorCommand.Stdout = os.Stdout
 
@@ -94,34 +121,38 @@ func editTaskdefinitionRun(cmd *cobra.Command, _ []string) {
 		log.Panic(err)
 	}
 
-	readTmpTaskDefinitionFile, err := os.Open(tmpTaskDefinitionFile)
+	readEditedTaskDefinitionFile, err := os.Open(editedTaskDefinitionFile)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	defer readTmpTaskDefinitionFile.Close()
+	defer readEditedTaskDefinitionFile.Close()
 
-	rawTaskInput, err := ioutil.ReadAll(readTmpTaskDefinitionFile)
+	newTaskDefinitionJSON, err := ioutil.ReadAll(readEditedTaskDefinitionFile)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	var taskInput ecs.RegisterTaskDefinitionInput
+	var newTasktaskInput ecs.RegisterTaskDefinitionInput
 
-	err = json.Unmarshal([]byte(rawTaskInput), &taskInput)
-	if err != nil {
-		log.Panic(err)
-	}
+	fmt.Println(createDiff(string(currentTaskDefinitionJSON), string(newTaskDefinitionJSON)))
 
-	result, err := svc.RegisterTaskDefinition(&taskInput)
-	if err != nil {
-		log.Panic(err)
-	}
+	if waitUserAcceptChanges() {
+		err = json.Unmarshal([]byte(newTaskDefinitionJSON), &newTasktaskInput)
+		if err != nil {
+			log.Panic(err)
+		}
 
-	fmt.Println(result.TaskDefinition)
+		result, err := svc.RegisterTaskDefinition(&newTasktaskInput)
+		if err != nil {
+			log.Panic(err)
+		}
 
-	err = os.Remove(tmpTaskDefinitionFile)
-	if err != nil {
-		log.Panic(err)
+		fmt.Println(result.TaskDefinition)
+
+		err = os.Remove(editedTaskDefinitionFile)
+		if err != nil {
+			log.Panic(err)
+		}
 	}
 }

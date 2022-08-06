@@ -33,11 +33,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// createTaskdefinitionCmd represents the createTaskdefinition command
-var createTaskdefinitionCmd = &cobra.Command{
-	Use:   "create-task-definition",
-	Short: "Create task definition using JSON file",
-	Run:   createTaskdefinitionRun,
+// registerTaskdefinitionCmd represents the registerTaskdefinition command
+var registerTaskdefinitionCmd = &cobra.Command{
+	Use:   "register-task-definition",
+	Short: "Register task definition using JSON file",
+	Run:   registerTaskdefinitionRun,
 }
 
 var (
@@ -45,11 +45,11 @@ var (
 )
 
 func init() {
-	taskDefinitionCmd.AddCommand(createTaskdefinitionCmd)
+	taskDefinitionCmd.AddCommand(registerTaskdefinitionCmd)
 	taskDefinitionCmd.PersistentFlags().StringVarP(&taskJsonInput, "input-json", "", "", "Input task definition with JSON format")
 }
 
-func createTaskdefinitionRun(cmd *cobra.Command, _ []string) {
+func registerTaskdefinitionRun(cmd *cobra.Command, _ []string) {
 	sess := provider.NewSession()
 	svc := ecs.New(sess)
 
