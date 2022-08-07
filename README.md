@@ -89,7 +89,7 @@ ecsctl services create-service --input-json examples/service_example.json
 Listing services
 
 ```sh
-./ecsctl services list-services --cluster-name <cluster name>
+ecsctl services list-services --cluster-name <cluster name>
 ```
 
 Describe service informations
