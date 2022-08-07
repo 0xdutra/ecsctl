@@ -1,0 +1,29 @@
+{
+    "Cluster": "default",
+    "DeploymentConfiguration": {
+      "MaximumPercent": 200,
+      "MinimumHealthyPercent": 100
+    },
+    "DeploymentController": {
+      "Type": "ECS"
+    },
+    "Deployments": [],
+    "DesiredCount": 2,
+    "EnableECSManagedTags": false,
+    "EnableExecuteCommand": false,
+    "HealthCheckGracePeriodSeconds": 0,
+    "LaunchType": "EC2",
+    "LoadBalancers": [{
+        "ContainerName": "ecsctl-apache-example",
+        "ContainerPort": 3000,
+        "TargetGroupArn": ""
+      }],
+    "PlacementConstraints": [],
+    "PlacementStrategy": [],
+    "PropagateTags": "NONE",
+    "SchedulingStrategy": "REPLICA",
+    "ServiceName": "ecsctl-apache-example",
+    "ServiceRegistries": [],
+    "Status": "ACTIVE",
+    "TaskDefinition": "ecsctl-apache-example:1"
+}

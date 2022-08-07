@@ -22,11 +22,12 @@
 ```sh
 cluster         - Commands to manage ECS clusters
 task-definition - Commands to manage task definitions
+services        - Commands to manage ECS services
 ```
 
 <hr>
 
-### cluster subcommands
+### Cluster subcommands
 
 ```sh
 create-cluster - Create ECS cluster
@@ -34,7 +35,7 @@ delete-cluster - Delete ECS cluster
 list-clusters  - List all ECS clusters
 ```
 
-### cluster examples
+### Cluster examples
 
 ```sh
 ecsctl cluster create-cluster --name example01
@@ -43,19 +44,58 @@ ecsctl cluster delete-cluster --name example01
 
 <hr>
 
-### task definition subcommands
+### Task definition subcommands
 
 ```sh
-create-task-definition - Create task definition
-edit-task-definition   - Edit a task definition using a text editor
+register-task-definition - Register task definition
+edit-task-definition     - Edit a task definition using a text editor
 ```
 
-### task definition examples
+### Task definition examples
 
 ```sh
-ecsctl task-definition create-task-definition --input-json examples/task_definition_example.json
+ecsctl task-definition register-task-definition --input-json examples/task_definition_example.json
 ```
 
 ```sh
 ecsctl task-definition edit-task-definition --name ecsctl-apache-example --revision 1 --editor nano
+```
+
+<hr>
+
+### Services
+
+### Service subcommands
+
+```sh
+create-service     - Commands to create ECS services
+describe-services  - Commands to describe ECS services
+list-services      - Commands to list services in your ECS cluster
+update-autoscaling - Commands to update ECS services
+```
+
+### Service examples
+
+Updating autoscaling
+
+```sh
+ecsctl services update-autoscaling --min 2 --max 2 --desired 2 --service-name <service name> --cluster-name <cluster name>
+```
+
+Creating a service using a JSON manifest
+
+```sh
+ecsctl services create-service --input-json examples/service_example.json
+```
+
+Listing services
+
+```sh
+./ecsctl services list-services --cluster-name <cluster name>
+```
+
+Describe service informations
+
+```sh
+ecsctl services describe-services --service-arn <service arn> --cluster-name <cluster name>
 ```
