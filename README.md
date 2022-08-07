@@ -63,8 +63,6 @@ ecsctl task-definition edit-task-definition --name ecsctl-apache-example --revis
 
 <hr>
 
-### Services
-
 ### Service subcommands
 
 ```sh
