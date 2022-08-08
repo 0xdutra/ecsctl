@@ -34,9 +34,9 @@ import (
 
 // updateServiceCmd represents the updateService command
 var updateServiceCmd = &cobra.Command{
-	Use:   "update-autoscaling",
-	Short: "Commands to update ECS services",
-	Run:   updateServiceRun,
+	Use:   "update-capacity",
+	Short: "Commands to update ECS service capacity",
+	Run:   updateCapacityServiceRun,
 }
 
 var (
@@ -54,7 +54,7 @@ func init() {
 	servicesCmd.PersistentFlags().StringVarP(&serviceName, "service-name", "", "", "The name of the ECS service")
 }
 
-func updateServiceRun(cmd *cobra.Command, args []string) {
+func updateCapacityServiceRun(cmd *cobra.Command, args []string) {
 	sess := provider.NewSession()
 	svc := ecs.New(sess)
 
