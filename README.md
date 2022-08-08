@@ -69,15 +69,15 @@ ecsctl task-definition edit-task-definition --name ecsctl-apache-example --revis
 create-service     - Commands to create ECS services
 describe-services  - Commands to describe ECS services
 list-services      - Commands to list services in your ECS cluster
-update-autoscaling - Commands to update ECS services
+update-capacity    - Commands to update services capacity
 ```
 
 ### Service examples
 
-Updating autoscaling
+Updating capacity
 
 ```sh
-ecsctl services update-autoscaling --min 2 --max 2 --desired 2 --service-name <service name> --cluster-name <cluster name>
+ecsctl services update-capacity --min 2 --max 2 --desired 2 --service-name <service name> --cluster-name <cluster name>
 ```
 
 Creating a service using a JSON manifest
