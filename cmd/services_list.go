@@ -33,7 +33,7 @@ import (
 
 // listServicesCmd represents the listServices command
 var listServicesCmd = &cobra.Command{
-	Use:   "list-services",
+	Use:   "list",
 	Short: "Commands to list services in your ECS cluster",
 	Run:   listServicesRun,
 }

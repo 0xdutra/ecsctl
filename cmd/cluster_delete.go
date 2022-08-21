@@ -33,7 +33,7 @@ import (
 
 // deleteClusterCmd represents the deleteCluster command
 var deleteClusterCmd = &cobra.Command{
-	Use:   "delete-cluster",
+	Use:   "delete",
 	Short: "Commands to delete ECS cluster",
 	Run:   deleteClusterRun,
 }

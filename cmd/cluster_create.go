@@ -32,7 +32,7 @@ import (
 )
 
 var createClusterCmd = &cobra.Command{
-	Use:   "create-cluster",
+	Use:   "create",
 	Short: "Commands to create ECS cluster",
 	Run:   createClusterRun,
 }

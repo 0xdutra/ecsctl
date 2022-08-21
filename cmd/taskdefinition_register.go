@@ -35,7 +35,7 @@ import (
 
 // registerTaskdefinitionCmd represents the registerTaskdefinition command
 var registerTaskdefinitionCmd = &cobra.Command{
-	Use:   "register-task-definition",
+	Use:   "register",
 	Short: "Register task definition using JSON file",
 	Run:   registerTaskdefinitionRun,
 }

@@ -32,8 +32,8 @@ import (
 
 // listClustersCmd represents the listClusters command
 var listClustersCmd = &cobra.Command{
-	Use:   "list-clusters",
-	Short: "Command to list all ECS clusters",
+	Use:   "list",
+	Short: "Commands to list all ECS clusters",
 	Run:   listClusters,
 }
 

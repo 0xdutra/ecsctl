@@ -38,7 +38,7 @@ import (
 
 // editTaskDefinitionCmd represents the editTaskDefinition command
 var editTaskDefinitionCmd = &cobra.Command{
-	Use:   "edit-task-definition",
+	Use:   "edit",
 	Short: "Edit a task definition and create a new revision",
 	Run:   editTaskdefinitionRun,
 }

@@ -35,7 +35,7 @@ import (
 
 // createServiceCmd represents the createService command
 var createServiceCmd = &cobra.Command{
-	Use:     "create-service",
+	Use:     "create",
 	Short:   "Commands to create ECS services",
 	Run:     createServiceRun,
 	Example: "ecsctl services create-service --input-json examples/service_simple_example.json",

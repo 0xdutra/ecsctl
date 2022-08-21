@@ -47,5 +47,5 @@ var (
 
 func init() {
 	rootCmd.AddCommand(servicesCmd)
-	servicesCmd.PersistentFlags().StringVarP(&servicesClusterName, "cluster-name", "n", "default", "The name of the ECS cluster")
+	servicesCmd.PersistentFlags().StringVarP(&servicesClusterName, "name", "n", "default", "The name of the ECS cluster")
 }

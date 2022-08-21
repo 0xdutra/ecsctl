@@ -33,7 +33,7 @@ import (
 
 // describeServicesCmd represents the describeServices command
 var describeServicesCmd = &cobra.Command{
-	Use:   "describe-services",
+	Use:   "describe",
 	Short: "Commands to describe ECS services",
 	Run:   describeServicesRun,
 }
