@@ -55,5 +55,5 @@ var clusterCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(clusterCmd)
-	clusterCmd.PersistentFlags().StringVarP(&clusterName, "name", "n", "default", "The name of the ECS cluster")
+	clusterCmd.PersistentFlags().StringVarP(&clusterName, "cluster-name", "", "default", "The name of the ECS cluster")
 }

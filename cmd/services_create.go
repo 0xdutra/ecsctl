@@ -35,9 +35,10 @@ import (
 
 // createServiceCmd represents the createService command
 var createServiceCmd = &cobra.Command{
-	Use:   "create-service",
-	Short: "Commands to create ECS services",
-	Run:   createServiceRun,
+	Use:     "create-service",
+	Short:   "Commands to create ECS services",
+	Run:     createServiceRun,
+	Example: "ecsctl services create-service --input-json examples/service_simple_example.json",
 }
 
 var (
@@ -46,7 +47,7 @@ var (
 
 func init() {
 	servicesCmd.AddCommand(createServiceCmd)
-	servicesCmd.PersistentFlags().StringVarP(&serviceInputJson, "input-json", "", "", "Input service with JSON format")
+	createServiceCmd.PersistentFlags().StringVarP(&serviceInputJson, "input-json", "", "", "Input service with JSON format")
 }
 
 func createServiceRun(cmd *cobra.Command, args []string) {

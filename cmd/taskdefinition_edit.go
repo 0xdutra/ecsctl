@@ -51,9 +51,9 @@ var (
 
 func init() {
 	taskDefinitionCmd.AddCommand(editTaskDefinitionCmd)
-	taskDefinitionCmd.PersistentFlags().StringVarP(&editor, "editor", "", "vim", "The name of the text editor to use to edit task definition")
-	taskDefinitionCmd.PersistentFlags().StringVarP(&taskName, "name", "", "", "The name of the task definition")
-	taskDefinitionCmd.PersistentFlags().Int64VarP(&taskRevision, "revision", "", 1, "The revision of the task definition")
+	editTaskDefinitionCmd.PersistentFlags().StringVarP(&editor, "editor", "", "vim", "The name of the text editor to use to edit task definition")
+	editTaskDefinitionCmd.PersistentFlags().StringVarP(&taskName, "name", "", "", "The name of the task definition")
+	editTaskDefinitionCmd.PersistentFlags().Int64VarP(&taskRevision, "revision", "", 1, "The revision of the task definition")
 }
 
 func createDiff(currentTaskDefinition string, editedTaskDefinition string) string {

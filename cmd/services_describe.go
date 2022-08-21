@@ -44,7 +44,7 @@ var (
 
 func init() {
 	servicesCmd.AddCommand(describeServicesCmd)
-	servicesCmd.PersistentFlags().StringVarP(&serviceArn, "service-arn", "", "", "The ARN of the ECS service")
+	describeServicesCmd.Flags().StringVarP(&serviceArn, "service-arn", "", "", "The ARN of the ECS service")
 }
 
 func describeServicesRun(cmd *cobra.Command, args []string) {
