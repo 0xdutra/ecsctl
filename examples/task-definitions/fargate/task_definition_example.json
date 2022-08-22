@@ -5,16 +5,12 @@
     {
       "dnsSearchDomains": null,
       "environmentFiles": null,
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "secretOptions": null
-      },
       "entryPoint": null,
       "portMappings": [
         {
-          "hostPort": 3000,
+          "hostPort": 80,
           "protocol": "tcp",
-          "containerPort": 3000
+          "containerPort": 80
         }
       ],
       "command": null,
@@ -32,7 +28,7 @@
       "memoryReservation": 128,
       "volumesFrom": [],
       "stopTimeout": null,
-      "image": "863253368427.dkr.ecr.us-east-1.amazonaws.com/ecsctl-app",
+      "image": "httpd",
       "startTimeout": null,
       "firelensConfiguration": null,
       "dependsOn": null,
@@ -49,7 +45,7 @@
       "dockerLabels": null,
       "systemControls": null,
       "privileged": null,
-      "name": "ecsctl-test"
+      "name": "httpd"
     }
   ],
   "placementConstraints": [],
@@ -59,7 +55,7 @@
     "EC2",
     "FARGATE"
   ],
-  "family": "ecsctl-test",
+  "family": "httpd",
   "pidMode": null,
   "requiresCompatibilities": [
     "FARGATE"

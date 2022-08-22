@@ -14,23 +14,23 @@
     "HealthCheckGracePeriodSeconds": 0,
     "LaunchType": "FARGATE",
     "LoadBalancers": [{
-      "ContainerName": "ecsctl-test",
-      "ContainerPort": 3000,
-      "TargetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:863253368427:targetgroup/ecsctl-test/65a6ab76f5342b65"
+      "ContainerName": "httpd",
+      "ContainerPort": 80,
+      "TargetGroupArn": ""
     }],
     "NetworkConfiguration": {
       "AwsvpcConfiguration": {
         "AssignPublicIp": "ENABLED",
-        "SecurityGroups": ["sg-012f4b4311e1314e3"],
-        "Subnets": ["subnet-0d0cdf0ea51bc8a51","subnet-0a61bd9c135498282"]
+        "SecurityGroups": [],
+        "Subnets": []
       }
     },
     "PlacementConstraints": [],
     "PlacementStrategy": [],
     "PropagateTags": "NONE",
     "SchedulingStrategy": "REPLICA",
-    "ServiceName": "ecsctl-test",
+    "ServiceName": "httpd",
     "ServiceRegistries": [],
     "Status": "ACTIVE",
-    "TaskDefinition": "ecsctl-test:2"
+    "TaskDefinition": "httpd:1"
 }
