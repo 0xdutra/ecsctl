@@ -22,36 +22,47 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"ecsctl/pkg/provider"
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/service/elbv2"
 	"github.com/spf13/cobra"
 )
 
 // elbListCmd represents the list command
 var elbListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("list called")
-	},
+	Short: "Commands to list Elastic Load Balancers",
+	Run:   listElbRun,
 }
 
 func init() {
 	elbCmd.AddCommand(elbListCmd)
+}
 
-	// Here you will define your flags and configuration settings.
+func listElbRun(cmd *cobra.Command, args []string) {
+	sess := provider.NewSession()
+	svc := elbv2.New(sess)
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// listCmd.PersistentFlags().String("foo", "", "A help for foo")
+	input := &elbv2.DescribeLoadBalancersInput{}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	result, err := svc.DescribeLoadBalancers(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case elbv2.ErrCodeLoadBalancerNotFoundException:
+				fmt.Println(elbv2.ErrCodeLoadBalancerNotFoundException, aerr.Error())
+			default:
+				fmt.Println(aerr.Error())
+			}
+		} else {
+			fmt.Println(err.Error())
+		}
+		return
+	}
+
+	for _, elb := range result.LoadBalancers {
+		fmt.Println(*elb.LoadBalancerName)
+	}
 }
