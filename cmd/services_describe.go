@@ -39,12 +39,14 @@ var describeServicesCmd = &cobra.Command{
 }
 
 var (
-	serviceArn string
+	describeServiceArn         string
+	describeServiceClusterName string
 )
 
 func init() {
 	servicesCmd.AddCommand(describeServicesCmd)
-	describeServicesCmd.Flags().StringVarP(&serviceArn, "service-arn", "", "", "The ARN of the ECS service")
+	describeServicesCmd.Flags().StringVarP(&describeServiceArn, "arn", "", "", "The ARN of the ECS service")
+	describeServicesCmd.PersistentFlags().StringVarP(&describeServiceClusterName, "cluster", "", "default", "The name of the ECS cluster")
 }
 
 func describeServicesRun(cmd *cobra.Command, args []string) {
@@ -52,17 +54,15 @@ func describeServicesRun(cmd *cobra.Command, args []string) {
 	svc := ecs.New(sess)
 
 	result, err := svc.DescribeServices(&ecs.DescribeServicesInput{
-		Cluster: aws.String(servicesClusterName),
+		Cluster: aws.String(describeServiceClusterName),
 		Services: []*string{
-			aws.String(serviceArn),
+			aws.String(describeServiceArn),
 		},
 	})
 
 	if err != nil {
 		log.Panic(err)
 	}
-
-	fmt.Println(result.Services)
 
 	for _, svc := range result.Services {
 		fmt.Printf("\nClusterArn: %s\n", *svc.ClusterArn)
@@ -78,7 +78,6 @@ func describeServicesRun(cmd *cobra.Command, args []string) {
 		fmt.Printf("LoadBalancers: %s\n", svc.LoadBalancers)
 		fmt.Printf("PlacementConstraints: %s\n", svc.PlacementConstraints)
 		fmt.Printf("PlacementStrategy: %s\n", svc.PlacementStrategy)
-		fmt.Printf("PlacementConstraints: %s\n", svc.PlacementConstraints)
 		fmt.Printf("SchedulingStrategy: %s\n", *svc.SchedulingStrategy)
 		fmt.Printf("ServiceArn: %s\n", *svc.ServiceArn)
 		fmt.Printf("ServiceName: %s\n", *svc.ServiceName)
