@@ -24,6 +24,7 @@ package cmd
 import (
 	"ecsctl/pkg/provider"
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -45,7 +46,10 @@ var elbDeleteCmd = &cobra.Command{
 func init() {
 	elbCmd.AddCommand(elbDeleteCmd)
 	elbDeleteCmd.PersistentFlags().StringVarP(&loadBalancerArn, "arn", "", "", "The arn of the load balancer")
-	elbDeleteCmd.MarkPersistentFlagRequired("arn")
+
+	if err := elbDeleteCmd.MarkPersistentFlagRequired("arn"); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func deleteElbRun(cmd *cobra.Command, args []string) {

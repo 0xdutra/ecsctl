@@ -24,6 +24,7 @@ package cmd
 import (
 	"ecsctl/pkg/provider"
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -60,8 +61,13 @@ func init() {
 	createTargetGroupCmd.PersistentFlags().StringVarP(&targetGroupHealthCheckPath, "healthcheck-path", "", "/", "Health check path")
 	createTargetGroupCmd.PersistentFlags().Int64VarP(&targetGroupHealthCheckInterval, "healthcheck-interval", "", 30, "Health check interval in seconds")
 
-	createTargetGroupCmd.MarkPersistentFlagRequired("name")
-	createTargetGroupCmd.MarkPersistentFlagRequired("vpcid")
+	if err := createTargetGroupCmd.MarkPersistentFlagRequired("name"); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := createTargetGroupCmd.MarkPersistentFlagRequired("vpcid"); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func createTargetGroupRun(cmd *cobra.Command, args []string) {

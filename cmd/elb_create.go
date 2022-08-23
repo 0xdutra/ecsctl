@@ -52,8 +52,13 @@ func init() {
 	elbCreateCmd.PersistentFlags().StringArrayVarP(&subnets, "subnet", "", nil, "The list of subnets ids")
 	elbCreateCmd.PersistentFlags().StringVarP(&loadBalancerType, "type", "", "application", "The type of Elastic Load Balancer")
 
-	elbCreateCmd.MarkPersistentFlagRequired("name")
-	elbCreateCmd.MarkPersistentFlagRequired("subnet")
+	if err := elbCreateCmd.MarkPersistentFlagRequired("name"); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := elbCreateCmd.MarkPersistentFlagRequired("subnet"); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func createElbRun(cmd *cobra.Command, args []string) {

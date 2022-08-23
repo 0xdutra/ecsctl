@@ -24,6 +24,7 @@ package cmd
 import (
 	"ecsctl/pkg/provider"
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -52,8 +53,13 @@ func init() {
 	createElbListenerCmd.PersistentFlags().Int64VarP(&loadBalancerListenerPort, "tg-port", "", 80, "The port of the Target Group")
 	createElbListenerCmd.PersistentFlags().StringVarP(&loadBalancerListenerProtocol, "tg-protocol", "", "HTTP", "The protocol of the Target Group")
 
-	createElbListenerCmd.MarkPersistentFlagRequired("elb-arn")
-	createElbListenerCmd.MarkPersistentFlagRequired("tg-arn")
+	if err := createElbListenerCmd.MarkPersistentFlagRequired("elb-arn"); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := createElbListenerCmd.MarkPersistentFlagRequired("tg-arn"); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func createElbListenerRun(cmd *cobra.Command, args []string) {
