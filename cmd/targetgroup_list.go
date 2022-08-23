@@ -66,6 +66,6 @@ func listTargetGroupsRun(cmd *cobra.Command, args []string) {
 	}
 
 	for _, target := range result.TargetGroups {
-		fmt.Printf("\n%s\n", target)
+		fmt.Println(*target.TargetGroupName)
 	}
 }
