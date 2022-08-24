@@ -62,17 +62,12 @@ func init() {
 }
 
 func createElbRun(cmd *cobra.Command, args []string) {
-	var awsSubnets []*string
-	for _, v := range subnets {
-		awsSubnets = append(awsSubnets, aws.String(v))
-	}
-
 	sess := provider.NewSession()
 	svc := elbv2.New(sess)
 
 	input := &elbv2.CreateLoadBalancerInput{
 		Name:    aws.String(loadBalancerName),
-		Subnets: awsSubnets,
+		Subnets: aws.StringSlice(subnets),
 		Type:    aws.String(loadBalancerType),
 		Scheme:  aws.String(loadBalancerScheme),
 	}
