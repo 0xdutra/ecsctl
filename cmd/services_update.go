@@ -47,9 +47,9 @@ var (
 
 func init() {
 	servicesCmd.AddCommand(updateServiceCmd)
-	servicesCmd.PersistentFlags().StringVarP(&updateServiceName, "service", "s", "", "The name of the ECS service")
-	servicesCmd.PersistentFlags().StringVarP(&updateServiceTaskDef, "task-definition", "t", "", "The name of the task definition")
-	servicesCmd.PersistentFlags().BoolVarP(&updateServiceEnableForceDeploy, "force-new-deployment", "f", false, "Force new deployment")
+	updateServiceCmd.PersistentFlags().StringVarP(&updateServiceName, "service", "s", "", "The name of the ECS service")
+	updateServiceCmd.PersistentFlags().StringVarP(&updateServiceTaskDef, "task-definition", "t", "", "The name of the task definition")
+	updateServiceCmd.PersistentFlags().BoolVarP(&updateServiceEnableForceDeploy, "force-new-deployment", "f", false, "Force new deployment")
 
 	if err := updateServiceCmd.MarkPersistentFlagRequired("service"); err != nil {
 		log.Fatal(err)
