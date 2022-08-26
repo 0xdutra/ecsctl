@@ -148,11 +148,13 @@ func editTaskdefinitionRun(cmd *cobra.Command, _ []string) {
 			log.Panic(err)
 		}
 
-		fmt.Println(result.TaskDefinition)
-
 		err = os.Remove(editedTaskDefinitionFile)
 		if err != nil {
 			log.Panic(err)
 		}
+
+		revision := result.TaskDefinition
+
+		fmt.Printf("\n\nCreated revision %d for the task definition %s\n", *revision.Revision, taskName)
 	}
 }
