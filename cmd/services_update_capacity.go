@@ -34,10 +34,11 @@ import (
 
 // updateServiceCmd represents the updateService command
 var updateServiceCmd = &cobra.Command{
-	Use:     "update-capacity",
+	Use: "update-capacity",
+
 	Short:   "Commands to update ECS service capacity",
 	Run:     updateCapacityServiceRun,
-	Example: "ecsctl service update-capacity --service-name <service name>  --min 10 --max 20 --desired 10",
+	Example: "ecsctl service update-capacity --service <service name>  --min 10 --max 20 --desired 10",
 }
 
 var (
@@ -49,10 +50,10 @@ var (
 
 func init() {
 	servicesCmd.AddCommand(updateServiceCmd)
-	updateServiceCmd.PersistentFlags().Int64VarP(&minCapacity, "min", "", 2, "The lower boundary to which Service Auto Scaling can adjust your service’s desired count")
-	updateServiceCmd.PersistentFlags().Int64VarP(&maxCapacity, "max", "", 2, "The upper boundary to which Service Auto Scaling can adjust your service’s desired count")
+	updateServiceCmd.PersistentFlags().Int64VarP(&minCapacity, "min", "", 2, "The lower boundary to which Service Auto Scaling can adjust your service's desired count")
+	updateServiceCmd.PersistentFlags().Int64VarP(&maxCapacity, "max", "", 2, "The upper boundary to which Service Auto Scaling can adjust your service's desired count")
 	updateServiceCmd.PersistentFlags().Int64VarP(&desiredCapacity, "desired", "", 2, "The initial desired count to start with before Service Auto Scaling begins adjustment")
-	updateServiceCmd.PersistentFlags().StringVarP(&serviceName, "service-name", "", "", "The name of the ECS service")
+	updateServiceCmd.PersistentFlags().StringVarP(&serviceName, "service", "", "", "The name of the ECS service")
 }
 
 func updateCapacityServiceRun(cmd *cobra.Command, args []string) {
