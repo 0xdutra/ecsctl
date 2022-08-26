@@ -20,9 +20,11 @@
 ### All commands available
 
 ```sh
-cluster         - Commands to manage ECS clusters
-task-definition - Commands to manage task definitions
-services        - Commands to manage ECS services
+cluster         Commands to manage ECS cluster
+elb             Commands to manage Elastic Load Balancer
+services        Commands to manage ECS services
+targetgroup     Commands to manage target groups
+task-definition Commands to manage ECS task definitions
 ```
 
 <hr>
@@ -30,16 +32,17 @@ services        - Commands to manage ECS services
 ### Cluster subcommands
 
 ```sh
-create-cluster - Create ECS cluster
-delete-cluster - Delete ECS cluster
-list-clusters  - List all ECS clusters
+create - Create ECS cluster
+delete - Delete ECS cluster
+list   - List all ECS clusters
 ```
 
 ### Cluster examples
 
 ```sh
-ecsctl cluster create-cluster --name example01
-ecsctl cluster delete-cluster --name example01
+ecsctl cluster create --cluster example01
+ecsctl cluster list
+ecsctl cluster delete --cluster example01
 ```
 
 <hr>
@@ -47,18 +50,18 @@ ecsctl cluster delete-cluster --name example01
 ### Task definition subcommands
 
 ```sh
-register-task-definition - Register task definition
-edit-task-definition     - Edit a task definition using a text editor
+register - Register task definition
+edit     - Edit a task definition using a text editor
 ```
 
 ### Task definition examples
 
 ```sh
-ecsctl task-definition register-task-definition --input-json examples/task_definition_example.json
+ecsctl task-definition register --input-json examples/task_definition_example.json
 ```
 
 ```sh
-ecsctl task-definition edit-task-definition --name ecsctl-apache-example --revision 1 --editor nano
+ecsctl task-definition edit --name ecsctl-apache-example --revision 1 --editor nano
 ```
 
 <hr>
@@ -66,34 +69,48 @@ ecsctl task-definition edit-task-definition --name ecsctl-apache-example --revis
 ### Service subcommands
 
 ```sh
-create-service     - Commands to create ECS services
-describe-services  - Commands to describe ECS services
-list-services      - Commands to list services in your ECS cluster
-update-capacity    - Commands to update services capacity
+create          - Commands to create ECS service
+describe        - Commands to describe ECS service
+list            - Commands to list service in your ECS cluster
+status          - Commands to check the status of service
+update          - Commands to update ECS service
+update-capacity - Commands to update service capacity
 ```
 
 ### Service examples
 
+Checking status
+
+```
+ecsctl services status --service <service name> --cluster <cluster name>
+```
+
+Updating service
+
+```sh
+ecsctl services update --service <service name> --task-definition <taskdef name> --cluster <cluster name>
+```
+
 Updating capacity
 
 ```sh
-ecsctl services update-capacity --min 2 --max 2 --desired 2 --service-name <service name> --cluster-name <cluster name>
+ecsctl services update-capacity --min 2 --max 2 --desired 2 --service <service name> --cluster <cluster name>
 ```
 
 Creating a service using a JSON manifest
 
 ```sh
-ecsctl services create-service --input-json examples/service_example.json
+ecsctl services create --input-json examples/service_example.json
 ```
 
 Listing services
 
 ```sh
-ecsctl services list-services --cluster-name <cluster name>
+ecsctl services list --cluster <cluster name>
 ```
 
 Describe service informations
 
 ```sh
-ecsctl services describe-services --service-arn <service arn> --cluster-name <cluster name>
+ecsctl services describe --service <service name> --cluster <cluster name>
 ```
