@@ -24,6 +24,7 @@ package cmd
 import (
 	"ecsctl/pkg/provider"
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -45,6 +46,11 @@ var (
 func init() {
 	targetgroupCmd.AddCommand(describeTargetGroupsCmd)
 	describeTargetGroupsCmd.PersistentFlags().StringVarP(&describeTargetGroupsName, "name", "", "", "The name of the target group")
+
+	if err := describeTargetGroupsCmd.MarkPersistentFlagRequired("name"); err != nil {
+		log.Fatal(err)
+	}
+
 }
 
 func describeTargetGroupsRun(cmd *cobra.Command, args []string) {

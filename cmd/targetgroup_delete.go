@@ -24,6 +24,7 @@ package cmd
 import (
 	"ecsctl/pkg/provider"
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -31,8 +32,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// deleteCmd represents the delete command
-var deleteCmd = &cobra.Command{
+// deleteTargetGroupCmd represents the delete command
+var deleteTargetGroupCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Commands to delete target groups",
 	Run:   deleteTargetGroupRun,
@@ -43,8 +44,12 @@ var (
 )
 
 func init() {
-	targetgroupCmd.AddCommand(deleteCmd)
-	deleteCmd.PersistentFlags().StringVarP(&targetGroupArn, "arn", "", "", "The arn of the target group")
+	targetgroupCmd.AddCommand(deleteTargetGroupCmd)
+	deleteTargetGroupCmd.PersistentFlags().StringVarP(&targetGroupArn, "arn", "", "", "The arn of the target group")
+
+	if err := deleteTargetGroupCmd.MarkPersistentFlagRequired("arn"); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func deleteTargetGroupRun(cmd *cobra.Command, args []string) {

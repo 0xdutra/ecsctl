@@ -24,6 +24,7 @@ package cmd
 import (
 	"ecsctl/pkg/provider"
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -45,8 +46,16 @@ var (
 
 func init() {
 	servicesCmd.AddCommand(servicesStatusCmd)
-	servicesStatusCmd.PersistentFlags().StringVarP(&statusServiceClusterName, "cluster", "", "default", "The name of the ECS cluster")
+	servicesStatusCmd.PersistentFlags().StringVarP(&statusServiceClusterName, "cluster", "", "", "The name of the ECS cluster")
 	servicesStatusCmd.PersistentFlags().StringVarP(&statusServiceNameOrArn, "service", "", "", "The arn or name of the ECS service")
+
+	if err := servicesStatusCmd.MarkPersistentFlagRequired("cluster"); err != nil {
+		log.Panic(err)
+	}
+
+	if err := servicesStatusCmd.MarkPersistentFlagRequired("service"); err != nil {
+		log.Panic(err)
+	}
 }
 
 func statusServicesRun(cmd *cobra.Command, args []string) {

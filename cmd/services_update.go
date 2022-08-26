@@ -24,6 +24,7 @@ package cmd
 import (
 	"ecsctl/pkg/provider"
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -31,8 +32,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// updateCmd represents the update command
-var updateCmd = &cobra.Command{
+// updateServiceCmd represents the update command
+var updateServiceCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Commands to update ECS services",
 	Run:   updateServiceRun,
@@ -45,10 +46,18 @@ var (
 )
 
 func init() {
-	servicesCmd.AddCommand(updateCmd)
+	servicesCmd.AddCommand(updateServiceCmd)
 	servicesCmd.PersistentFlags().StringVarP(&updateServiceName, "service", "s", "", "The name of the ECS service")
 	servicesCmd.PersistentFlags().StringVarP(&updateServiceTaskDef, "task-definition", "t", "", "The name of the task definition")
 	servicesCmd.PersistentFlags().BoolVarP(&updateServiceEnableForceDeploy, "force-new-deployment", "f", false, "Force new deployment")
+
+	if err := updateServiceCmd.MarkPersistentFlagRequired("service"); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := updateServiceCmd.MarkPersistentFlagRequired("task-definition"); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func updateServiceRun(cmd *cobra.Command, args []string) {

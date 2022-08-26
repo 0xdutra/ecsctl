@@ -33,9 +33,10 @@ import (
 
 // listServicesCmd represents the listServices command
 var listServicesCmd = &cobra.Command{
-	Use:   "list",
-	Short: "Commands to list services in your ECS cluster",
-	Run:   listServicesRun,
+	Use:     "list",
+	Short:   "Commands to list services in your ECS cluster",
+	Run:     listServicesRun,
+	Example: "ecsctl services list --cluster <cluster name>",
 }
 
 func init() {

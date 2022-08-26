@@ -39,7 +39,6 @@ var targetGroupListCmd = &cobra.Command{
 
 func init() {
 	targetgroupCmd.AddCommand(targetGroupListCmd)
-
 }
 
 func listTargetGroupsRun(cmd *cobra.Command, args []string) {

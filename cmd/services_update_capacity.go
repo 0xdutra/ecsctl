@@ -32,8 +32,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// updateServiceCmd represents the updateService command
-var updateServiceCmd = &cobra.Command{
+// updateServiceCapacityCmd represents the updateService command
+var updateServiceCapacityCmd = &cobra.Command{
 	Use: "update-capacity",
 
 	Short:   "Commands to update ECS service capacity",
@@ -49,11 +49,27 @@ var (
 )
 
 func init() {
-	servicesCmd.AddCommand(updateServiceCmd)
-	updateServiceCmd.PersistentFlags().Int64VarP(&minCapacity, "min", "", 2, "The lower boundary to which Service Auto Scaling can adjust your service's desired count")
-	updateServiceCmd.PersistentFlags().Int64VarP(&maxCapacity, "max", "", 2, "The upper boundary to which Service Auto Scaling can adjust your service's desired count")
-	updateServiceCmd.PersistentFlags().Int64VarP(&desiredCapacity, "desired", "", 2, "The initial desired count to start with before Service Auto Scaling begins adjustment")
-	updateServiceCmd.PersistentFlags().StringVarP(&serviceName, "service", "", "", "The name of the ECS service")
+	servicesCmd.AddCommand(updateServiceCapacityCmd)
+	updateServiceCapacityCmd.PersistentFlags().Int64VarP(&minCapacity, "min", "", 2, "The lower boundary to which Service Auto Scaling can adjust your service's desired count")
+	updateServiceCapacityCmd.PersistentFlags().Int64VarP(&maxCapacity, "max", "", 2, "The upper boundary to which Service Auto Scaling can adjust your service's desired count")
+	updateServiceCapacityCmd.PersistentFlags().Int64VarP(&desiredCapacity, "desired", "", 2, "The initial desired count to start with before Service Auto Scaling begins adjustment")
+	updateServiceCapacityCmd.PersistentFlags().StringVarP(&serviceName, "service", "", "", "The name of the ECS service")
+
+	if err := updateServiceCapacityCmd.MarkPersistentFlagRequired("min"); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := updateServiceCapacityCmd.MarkPersistentFlagRequired("max"); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := updateServiceCapacityCmd.MarkPersistentFlagRequired("desired"); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := updateServiceCapacityCmd.MarkPersistentFlagRequired("service"); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func updateCapacityServiceRun(cmd *cobra.Command, args []string) {

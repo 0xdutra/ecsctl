@@ -31,6 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
 package cmd
 
 import (
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -55,5 +56,9 @@ var clusterCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(clusterCmd)
-	clusterCmd.PersistentFlags().StringVarP(&clusterName, "name", "", "default", "The name of the ECS cluster")
+	clusterCmd.PersistentFlags().StringVarP(&clusterName, "cluster", "", "", "The name of the ECS cluster")
+
+	if err := clusterCmd.MarkPersistentFlagRequired("cluster"); err != nil {
+		log.Fatal(err)
+	}
 }

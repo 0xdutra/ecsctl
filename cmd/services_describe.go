@@ -45,8 +45,16 @@ var (
 
 func init() {
 	servicesCmd.AddCommand(describeServicesCmd)
-	describeServicesCmd.Flags().StringVarP(&describeServiceArn, "arn", "", "", "The ARN of the ECS service")
-	describeServicesCmd.PersistentFlags().StringVarP(&describeServiceClusterName, "cluster", "", "default", "The name of the ECS cluster")
+	describeServicesCmd.PersistentFlags().StringVarP(&describeServiceArn, "arn", "", "", "The ARN of the ECS service")
+	describeServicesCmd.PersistentFlags().StringVarP(&describeServiceClusterName, "cluster", "", "", "The name of the ECS cluster")
+
+	if err := describeServicesCmd.MarkPersistentFlagRequired("arn"); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := describeServicesCmd.MarkPersistentFlagRequired("cluster"); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func describeServicesRun(cmd *cobra.Command, args []string) {

@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -47,5 +48,9 @@ var (
 
 func init() {
 	rootCmd.AddCommand(servicesCmd)
-	servicesCmd.PersistentFlags().StringVarP(&servicesClusterName, "name", "n", "default", "The name of the ECS cluster")
+	servicesCmd.PersistentFlags().StringVarP(&servicesClusterName, "cluster", "c", "", "The name of the ECS cluster")
+
+	if err := servicesCmd.MarkPersistentFlagRequired("cluster"); err != nil {
+		log.Fatal(err)
+	}
 }
