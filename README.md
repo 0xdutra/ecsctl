@@ -98,7 +98,7 @@ ecsctl targetgroup create --name app-01 --vpcid vpc-0ace6f05189d4881c
 Deleting target group
 
 ```sh
-./ecsctl targetgroup delete --arn arn:aws:elasticloadbalancing:us-east-1:833233368432:targetgroup/app-01/514717b87162a881
+ecsctl targetgroup delete --arn arn:aws:elasticloadbalancing:us-east-1:833233368432:targetgroup/app-01/514717b87162a881
 ```
 
 <hr>
