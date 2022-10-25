@@ -41,13 +41,9 @@ var createServiceCmd = &cobra.Command{
 	Example: "ecsctl services create --input-json examples/service_simple_example.json",
 }
 
-var (
-	serviceInputJson string
-)
-
 func init() {
 	servicesCmd.AddCommand(createServiceCmd)
-	createServiceCmd.PersistentFlags().StringVarP(&serviceInputJson, "input-json", "", "", "Input service with JSON format")
+	createServiceCmd.PersistentFlags().StringVarP(&so.serviceInputJson, "input-json", "", "", "Input service with JSON format")
 
 	if err := createServiceCmd.MarkPersistentFlagRequired("input-json"); err != nil {
 		log.Fatal(err)
@@ -58,7 +54,7 @@ func createServiceRun(cmd *cobra.Command, args []string) {
 	sess := provider.NewSession()
 	svc := ecs.New(sess)
 
-	serviceFile, err := os.Open(serviceInputJson)
+	serviceFile, err := os.Open(so.serviceInputJson)
 	if err != nil {
 		log.Panic(err)
 	}

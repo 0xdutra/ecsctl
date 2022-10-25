@@ -43,17 +43,11 @@ var editTaskDefinitionCmd = &cobra.Command{
 	Run:   editTaskdefinitionRun,
 }
 
-var (
-	editor       string
-	taskName     string
-	taskRevision int64
-)
-
 func init() {
 	taskDefinitionCmd.AddCommand(editTaskDefinitionCmd)
-	editTaskDefinitionCmd.PersistentFlags().StringVarP(&editor, "editor", "", "vim", "The name of the text editor to use to edit task definition")
-	editTaskDefinitionCmd.PersistentFlags().StringVarP(&taskName, "name", "", "", "The name of the task definition")
-	editTaskDefinitionCmd.PersistentFlags().Int64VarP(&taskRevision, "revision", "", 1, "The revision of the task definition")
+	editTaskDefinitionCmd.PersistentFlags().StringVarP(&tdfo.editor, "editor", "", "vim", "The name of the text editor to use to edit task definition")
+	editTaskDefinitionCmd.PersistentFlags().StringVarP(&tdfo.taskName, "name", "", "", "The name of the task definition")
+	editTaskDefinitionCmd.PersistentFlags().Int64VarP(&tdfo.taskRevision, "revision", "", 1, "The revision of the task definition")
 }
 
 func createDiff(currentTaskDefinition string, editedTaskDefinition string) string {
@@ -64,7 +58,7 @@ func getCurrentTaskDefinition(taskDefinitionName string, taskDefinitionRevision 
 	sess := provider.NewSession()
 	svc := ecs.New(sess)
 
-	taskDefinitionWithRevision := fmt.Sprintf("%s:%d", taskName, taskRevision)
+	taskDefinitionWithRevision := fmt.Sprintf("%s:%d", tdfo.taskName, tdfo.taskRevision)
 
 	input := &ecs.DescribeTaskDefinitionInput{
 		TaskDefinition: aws.String(taskDefinitionWithRevision),
@@ -95,10 +89,10 @@ func editTaskdefinitionRun(cmd *cobra.Command, _ []string) {
 	sess := provider.NewSession()
 	svc := ecs.New(sess)
 
-	currentTaskDefinition := getCurrentTaskDefinition(taskName, taskRevision)
+	currentTaskDefinition := getCurrentTaskDefinition(tdfo.taskName, tdfo.taskRevision)
 
 	currentTaskDefinitionJSON, _ := json.MarshalIndent(currentTaskDefinition.TaskDefinition, "", "  ")
-	editedTaskDefinitionFile := fmt.Sprintf("tmp_%s_%d.json", taskName, taskRevision)
+	editedTaskDefinitionFile := fmt.Sprintf("tmp_%s_%d.json", tdfo.taskName, tdfo.taskRevision)
 
 	newTaskDefinition, err := os.Create(editedTaskDefinitionFile)
 	if err != nil {
@@ -112,7 +106,7 @@ func editTaskdefinitionRun(cmd *cobra.Command, _ []string) {
 		log.Panic(err)
 	}
 
-	editorCommand := exec.Command(editor, editedTaskDefinitionFile)
+	editorCommand := exec.Command(tdfo.editor, editedTaskDefinitionFile)
 	editorCommand.Stdin = os.Stdin
 	editorCommand.Stdout = os.Stdout
 
@@ -155,6 +149,6 @@ func editTaskdefinitionRun(cmd *cobra.Command, _ []string) {
 
 		revision := result.TaskDefinition
 
-		fmt.Printf("\n\nCreated revision %d for the task definition %s\n", *revision.Revision, taskName)
+		fmt.Printf("\n\nCreated revision %d for the task definition %s\n", *revision.Revision, tdfo.taskName)
 	}
 }

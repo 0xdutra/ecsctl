@@ -46,7 +46,7 @@ func createClusterRun(cmd *cobra.Command, _ []string) {
 	svc := ecs.New(sess)
 
 	input := &ecs.CreateClusterInput{
-		ClusterName: aws.String(clusterName),
+		ClusterName: aws.String(co.clusterName),
 	}
 
 	result, err := svc.CreateCluster(input)

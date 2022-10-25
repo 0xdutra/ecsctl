@@ -38,19 +38,12 @@ var elbCreateCmd = &cobra.Command{
 	Run:   createElbRun,
 }
 
-var (
-	subnets            []string
-	loadBalancerName   string
-	loadBalancerScheme string
-	loadBalancerType   string
-)
-
 func init() {
 	elbCmd.AddCommand(elbCreateCmd)
-	elbCreateCmd.PersistentFlags().StringVarP(&loadBalancerName, "name", "", "", "The name of the Elastic Load Balancer")
-	elbCreateCmd.PersistentFlags().StringVarP(&loadBalancerScheme, "scheme", "", "internet-facing", "Specify a scheme for a Elastic Load Balancer")
-	elbCreateCmd.PersistentFlags().StringArrayVarP(&subnets, "subnet", "", nil, "The list of subnets ids")
-	elbCreateCmd.PersistentFlags().StringVarP(&loadBalancerType, "type", "", "application", "The type of Elastic Load Balancer")
+	elbCreateCmd.PersistentFlags().StringVarP(&eo.loadBalancerName, "name", "", "", "The name of the Elastic Load Balancer")
+	elbCreateCmd.PersistentFlags().StringVarP(&eo.loadBalancerScheme, "scheme", "", "internet-facing", "Specify a scheme for a Elastic Load Balancer")
+	elbCreateCmd.PersistentFlags().StringArrayVarP(&eo.loadBlanacerSubnets, "subnet", "", nil, "The list of subnets ids")
+	elbCreateCmd.PersistentFlags().StringVarP(&eo.loadBalancerType, "type", "", "application", "The type of Elastic Load Balancer")
 
 	if err := elbCreateCmd.MarkPersistentFlagRequired("name"); err != nil {
 		log.Fatal(err)
@@ -66,10 +59,10 @@ func createElbRun(cmd *cobra.Command, args []string) {
 	svc := elbv2.New(sess)
 
 	input := &elbv2.CreateLoadBalancerInput{
-		Name:    aws.String(loadBalancerName),
-		Subnets: aws.StringSlice(subnets),
-		Type:    aws.String(loadBalancerType),
-		Scheme:  aws.String(loadBalancerScheme),
+		Name:    aws.String(eo.loadBalancerName),
+		Subnets: aws.StringSlice(eo.loadBlanacerSubnets),
+		Type:    aws.String(eo.loadBalancerType),
+		Scheme:  aws.String(eo.loadBalancerScheme),
 	}
 
 	result, err := svc.CreateLoadBalancer(input)

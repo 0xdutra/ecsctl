@@ -44,7 +44,7 @@ func init() {
 }
 
 func listServicesRun(cmd *cobra.Command, _ []string) {
-	svcs, err := listServices(servicesClusterName)
+	svcs, err := listServices(so.clusterName)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -54,7 +54,7 @@ func listServicesRun(cmd *cobra.Command, _ []string) {
 	}
 }
 
-func listServices(servicesClusterName string) ([]string, error) {
+func listServices(clusterName string) ([]string, error) {
 	sess := provider.NewSession()
 	svc := ecs.New(sess)
 
@@ -63,7 +63,7 @@ func listServices(servicesClusterName string) ([]string, error) {
 
 	for {
 		result, err := svc.ListServices(&ecs.ListServicesInput{
-			Cluster:   aws.String(servicesClusterName),
+			Cluster:   aws.String(clusterName),
 			NextToken: &nextToken,
 		})
 

@@ -40,20 +40,16 @@ var registerTaskdefinitionCmd = &cobra.Command{
 	Run:   registerTaskdefinitionRun,
 }
 
-var (
-	taskJsonInput string
-)
-
 func init() {
 	taskDefinitionCmd.AddCommand(registerTaskdefinitionCmd)
-	registerTaskdefinitionCmd.PersistentFlags().StringVarP(&taskJsonInput, "input-json", "", "", "Input task definition with JSON format")
+	registerTaskdefinitionCmd.PersistentFlags().StringVarP(&tdfo.taskJsonInput, "input-json", "", "", "Input task definition with JSON format")
 }
 
 func registerTaskdefinitionRun(cmd *cobra.Command, _ []string) {
 	sess := provider.NewSession()
 	svc := ecs.New(sess)
 
-	taskFile, err := os.Open(taskJsonInput)
+	taskFile, err := os.Open(tdfo.taskJsonInput)
 	if err != nil {
 		log.Panic(err)
 	}

@@ -39,19 +39,12 @@ var createElbListenerCmd = &cobra.Command{
 	Run:   createElbListenerRun,
 }
 
-var (
-	loadBalancerListenerArn      string
-	loadBalancerListenerTgArn    string
-	loadBalancerListenerPort     int64
-	loadBalancerListenerProtocol string
-)
-
 func init() {
 	elbCmd.AddCommand(createElbListenerCmd)
-	createElbListenerCmd.PersistentFlags().StringVarP(&loadBalancerListenerArn, "elb-arn", "", "", "The arn of the Elastic Load Balancer")
-	createElbListenerCmd.PersistentFlags().StringVarP(&loadBalancerListenerTgArn, "tg-arn", "", "", "The arn of the Target Group")
-	createElbListenerCmd.PersistentFlags().Int64VarP(&loadBalancerListenerPort, "tg-port", "", 80, "The port of the Target Group")
-	createElbListenerCmd.PersistentFlags().StringVarP(&loadBalancerListenerProtocol, "tg-protocol", "", "HTTP", "The protocol of the Target Group")
+	createElbListenerCmd.PersistentFlags().StringVarP(&eo.loadBalancerListenerArn, "elb-arn", "", "", "The arn of the Elastic Load Balancer")
+	createElbListenerCmd.PersistentFlags().StringVarP(&eo.loadBalancerListenerTgArn, "tg-arn", "", "", "The arn of the Target Group")
+	createElbListenerCmd.PersistentFlags().Int64VarP(&eo.loadBalancerListenerPort, "tg-port", "", 80, "The port of the Target Group")
+	createElbListenerCmd.PersistentFlags().StringVarP(&eo.loadBalancerListenerProtocol, "tg-protocol", "", "HTTP", "The protocol of the Target Group")
 
 	if err := createElbListenerCmd.MarkPersistentFlagRequired("elb-arn"); err != nil {
 		log.Fatal(err)
@@ -69,13 +62,13 @@ func createElbListenerRun(cmd *cobra.Command, args []string) {
 	input := &elbv2.CreateListenerInput{
 		DefaultActions: []*elbv2.Action{
 			{
-				TargetGroupArn: aws.String(loadBalancerListenerTgArn),
+				TargetGroupArn: aws.String(eo.loadBalancerListenerTgArn),
 				Type:           aws.String("forward"),
 			},
 		},
-		LoadBalancerArn: aws.String(loadBalancerListenerArn),
-		Port:            aws.Int64(loadBalancerListenerPort),
-		Protocol:        aws.String(loadBalancerListenerProtocol),
+		LoadBalancerArn: aws.String(eo.loadBalancerListenerArn),
+		Port:            aws.Int64(eo.loadBalancerListenerPort),
+		Protocol:        aws.String(eo.loadBalancerListenerProtocol),
 	}
 
 	result, err := svc.CreateListener(input)

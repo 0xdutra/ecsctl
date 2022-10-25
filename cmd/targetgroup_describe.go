@@ -39,13 +39,9 @@ var describeTargetGroupsCmd = &cobra.Command{
 	Run:   describeTargetGroupsRun,
 }
 
-var (
-	describeTargetGroupsName string
-)
-
 func init() {
 	targetgroupCmd.AddCommand(describeTargetGroupsCmd)
-	describeTargetGroupsCmd.PersistentFlags().StringVarP(&describeTargetGroupsName, "name", "", "", "The name of the target group")
+	describeTargetGroupsCmd.PersistentFlags().StringVarP(&tgo.targetGroupName, "name", "", "", "The name of the target group")
 
 	if err := describeTargetGroupsCmd.MarkPersistentFlagRequired("name"); err != nil {
 		log.Fatal(err)
@@ -59,7 +55,7 @@ func describeTargetGroupsRun(cmd *cobra.Command, args []string) {
 
 	input := &elbv2.DescribeTargetGroupsInput{
 		Names: []*string{
-			aws.String(describeTargetGroupsName),
+			aws.String(tgo.targetGroupName),
 		},
 	}
 

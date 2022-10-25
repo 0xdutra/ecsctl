@@ -39,15 +39,10 @@ var servicesStatusCmd = &cobra.Command{
 	Run:   statusServicesRun,
 }
 
-var (
-	statusServiceClusterName string
-	statusServiceNameOrArn   string
-)
-
 func init() {
 	servicesCmd.AddCommand(servicesStatusCmd)
-	servicesStatusCmd.PersistentFlags().StringVarP(&statusServiceClusterName, "cluster", "", "", "The name of the ECS cluster")
-	servicesStatusCmd.PersistentFlags().StringVarP(&statusServiceNameOrArn, "service", "", "", "The arn or name of the ECS service")
+	servicesStatusCmd.PersistentFlags().StringVarP(&so.clusterName, "cluster", "", "", "The name of the ECS cluster")
+	servicesStatusCmd.PersistentFlags().StringVarP(&so.serviceName, "service", "", "", "The arn or name of the ECS service")
 
 	if err := servicesStatusCmd.MarkPersistentFlagRequired("cluster"); err != nil {
 		log.Panic(err)
@@ -63,9 +58,9 @@ func statusServicesRun(cmd *cobra.Command, args []string) {
 	svc := ecs.New(sess)
 
 	input := &ecs.DescribeServicesInput{
-		Cluster: aws.String(statusServiceClusterName),
+		Cluster: aws.String(so.clusterName),
 		Services: []*string{
-			aws.String(statusServiceNameOrArn),
+			aws.String(so.serviceName),
 		},
 	}
 
@@ -106,5 +101,8 @@ func statusServicesRun(cmd *cobra.Command, args []string) {
 				*deployment.TaskDefinition,
 				*deployment.UpdatedAt)
 		}
+
+		latest_event := status.Events[0]
+		fmt.Printf("Latest event: %s\nId: %s\nMessage: %s\n", *latest_event.CreatedAt, *latest_event.Id, *latest_event.Message)
 	}
 }

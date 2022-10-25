@@ -28,6 +28,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type servicesOpts struct {
+	clusterName              string
+	serviceName              string
+	serviceTaskDefinition    string
+	serviceEnableForceDeploy bool
+	serviceInputJson         string
+	serviceMinCapacity       int64
+	serviceMaxCapacity       int64
+	serviceDesiredCapacity   int64
+}
+
+var so = servicesOpts{}
+
 func servicesRun(cmd *cobra.Command, args []string) {
 	err := cmd.Help()
 	if err != nil {
@@ -42,13 +55,9 @@ var servicesCmd = &cobra.Command{
 	Run:   servicesRun,
 }
 
-var (
-	servicesClusterName string
-)
-
 func init() {
 	rootCmd.AddCommand(servicesCmd)
-	servicesCmd.PersistentFlags().StringVarP(&servicesClusterName, "cluster", "c", "", "The name of the ECS cluster")
+	servicesCmd.PersistentFlags().StringVarP(&so.clusterName, "cluster", "c", "", "The name of the ECS cluster")
 
 	if err := servicesCmd.MarkPersistentFlagRequired("cluster"); err != nil {
 		log.Fatal(err)

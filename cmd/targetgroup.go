@@ -27,6 +27,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type targetGroupOpts struct {
+	targetGroupName                string
+	targetGroupArn                 string
+	targetGroupPort                int64
+	targetGroupProtocol            string
+	targetGroupVpcID               string
+	targetGroupType                string
+	targetGroupEnableHealthCheck   bool
+	targetGroupHealthCheckPath     string
+	targetGroupHealthCheckInterval int64
+}
+
+var tgo = targetGroupOpts{}
+
 func targetGroupRun(cmd *cobra.Command, args []string) {
 	err := cmd.Help()
 	if err != nil {

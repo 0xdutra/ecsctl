@@ -47,7 +47,7 @@ func deleteClusterRun(cmd *cobra.Command, _ []string) {
 	svc := ecs.New(sess)
 
 	input := &ecs.DeleteClusterInput{
-		Cluster: aws.String(clusterName),
+		Cluster: aws.String(co.clusterName),
 	}
 
 	result, err := svc.DeleteCluster(input)

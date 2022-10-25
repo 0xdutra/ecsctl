@@ -27,6 +27,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type elbOpts struct {
+	loadBalancerArn              string
+	loadBalancerName             string
+	loadBlanacerSubnets          []string
+	loadBalancerScheme           string
+	loadBalancerType             string
+	loadBalancerListenerArn      string
+	loadBalancerListenerTgArn    string
+	loadBalancerListenerPort     int64
+	loadBalancerListenerProtocol string
+}
+
+var eo = elbOpts{}
+
 func elbRun(cmd *cobra.Command, args []string) {
 	err := cmd.Help()
 	if err != nil {

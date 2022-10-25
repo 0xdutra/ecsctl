@@ -39,17 +39,11 @@ var updateServiceCmd = &cobra.Command{
 	Run:   updateServiceRun,
 }
 
-var (
-	updateServiceName              string
-	updateServiceTaskDef           string
-	updateServiceEnableForceDeploy bool
-)
-
 func init() {
 	servicesCmd.AddCommand(updateServiceCmd)
-	updateServiceCmd.PersistentFlags().StringVarP(&updateServiceName, "service", "s", "", "The name of the ECS service")
-	updateServiceCmd.PersistentFlags().StringVarP(&updateServiceTaskDef, "task-definition", "t", "", "The name of the task definition")
-	updateServiceCmd.PersistentFlags().BoolVarP(&updateServiceEnableForceDeploy, "force-new-deployment", "f", false, "Force new deployment")
+	updateServiceCmd.PersistentFlags().StringVarP(&so.serviceName, "service", "s", "", "The name of the ECS service")
+	updateServiceCmd.PersistentFlags().StringVarP(&so.serviceTaskDefinition, "task-definition", "t", "", "The name of the task definition")
+	updateServiceCmd.PersistentFlags().BoolVarP(&so.serviceEnableForceDeploy, "force-new-deployment", "f", false, "Force new deployment")
 
 	if err := updateServiceCmd.MarkPersistentFlagRequired("service"); err != nil {
 		log.Fatal(err)
@@ -65,10 +59,10 @@ func updateServiceRun(cmd *cobra.Command, args []string) {
 	svc := ecs.New(sess)
 
 	input := &ecs.UpdateServiceInput{
-		Cluster:            aws.String(servicesClusterName),
-		Service:            aws.String(updateServiceName),
-		TaskDefinition:     aws.String(updateServiceTaskDef),
-		ForceNewDeployment: aws.Bool(updateServiceEnableForceDeploy),
+		Cluster:            aws.String(so.clusterName),
+		Service:            aws.String(so.serviceName),
+		TaskDefinition:     aws.String(so.serviceTaskDefinition),
+		ForceNewDeployment: aws.Bool(so.serviceEnableForceDeploy),
 	}
 
 	_, err := svc.UpdateService(input)
@@ -102,5 +96,5 @@ func updateServiceRun(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	fmt.Printf("Successful update of %s service for task definition %s\n", updateServiceName, updateServiceTaskDef)
+	fmt.Printf("Successful update of %s service for task definition %s\n", so.serviceName, so.serviceTaskDefinition)
 }
