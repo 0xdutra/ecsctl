@@ -41,19 +41,12 @@ var updateServiceCapacityCmd = &cobra.Command{
 	Example: "ecsctl service update-capacity --service <service name>  --min 10 --max 20 --desired 10",
 }
 
-var (
-	minCapacity     int64
-	maxCapacity     int64
-	desiredCapacity int64
-	serviceName     string
-)
-
 func init() {
 	servicesCmd.AddCommand(updateServiceCapacityCmd)
-	updateServiceCapacityCmd.PersistentFlags().Int64VarP(&minCapacity, "min", "", 2, "The lower boundary to which Service Auto Scaling can adjust your service's desired count")
-	updateServiceCapacityCmd.PersistentFlags().Int64VarP(&maxCapacity, "max", "", 2, "The upper boundary to which Service Auto Scaling can adjust your service's desired count")
-	updateServiceCapacityCmd.PersistentFlags().Int64VarP(&desiredCapacity, "desired", "", 2, "The initial desired count to start with before Service Auto Scaling begins adjustment")
-	updateServiceCapacityCmd.PersistentFlags().StringVarP(&serviceName, "service", "", "", "The name of the ECS service")
+	updateServiceCapacityCmd.PersistentFlags().Int64VarP(&so.serviceMinCapacity, "min", "", 2, "The lower boundary to which Service Auto Scaling can adjust your service's desired count")
+	updateServiceCapacityCmd.PersistentFlags().Int64VarP(&so.serviceMaxCapacity, "max", "", 2, "The upper boundary to which Service Auto Scaling can adjust your service's desired count")
+	updateServiceCapacityCmd.PersistentFlags().Int64VarP(&so.serviceDesiredCapacity, "desired", "", 2, "The initial desired count to start with before Service Auto Scaling begins adjustment")
+	updateServiceCapacityCmd.PersistentFlags().StringVarP(&so.serviceName, "service", "", "", "The name of the ECS service")
 
 	if err := updateServiceCapacityCmd.MarkPersistentFlagRequired("min"); err != nil {
 		log.Fatal(err)
@@ -76,22 +69,27 @@ func updateCapacityServiceRun(cmd *cobra.Command, args []string) {
 	sess := provider.NewSession()
 	svc := ecs.New(sess)
 
-	err := updateAutoScalingRequirements(servicesClusterName, serviceName, maxCapacity, minCapacity)
+	err := updateAutoScalingRequirements(so.clusterName, so.serviceName, so.serviceMaxCapacity, so.serviceMinCapacity)
 	if err != nil {
 		log.Panic(err)
 	}
 
 	_, err = svc.UpdateService(&ecs.UpdateServiceInput{
-		Cluster:      aws.String(servicesClusterName),
-		DesiredCount: aws.Int64(desiredCapacity),
-		Service:      aws.String(serviceName),
+		Cluster:      aws.String(so.clusterName),
+		DesiredCount: aws.Int64(so.serviceDesiredCapacity),
+		Service:      aws.String(so.serviceName),
 	})
 
 	if err != nil {
 		log.Panic(err)
 	}
 
-	fmt.Printf("Updating capacity %s to minimum %d, desired %d and maximum %d\n", serviceName, minCapacity, desiredCapacity, maxCapacity)
+	fmt.Printf("Updating capacity %s to minimum %d, desired %d and maximum %d\n",
+		so.serviceName,
+		so.serviceMinCapacity,
+		so.serviceDesiredCapacity,
+		so.serviceMaxCapacity,
+	)
 }
 
 func updateAutoScalingRequirements(clusterName string, serviceName string, maxCapacity int64, minCapacity int64) error {

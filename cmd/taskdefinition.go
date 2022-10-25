@@ -27,6 +27,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type taskDefOpts struct {
+	editor        string
+	taskName      string
+	taskRevision  int64
+	taskJsonInput string
+}
+
+var tdfo = taskDefOpts{}
+
 func taskDefitionRun(cmd *cobra.Command, args []string) {
 	err := cmd.Help()
 	if err != nil {

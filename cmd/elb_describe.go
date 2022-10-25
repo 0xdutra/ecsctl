@@ -38,13 +38,9 @@ var describeElbCmd = &cobra.Command{
 	Run:   describeElbRun,
 }
 
-var (
-	describeLoadBalancersName string
-)
-
 func init() {
 	elbCmd.AddCommand(describeElbCmd)
-	describeElbCmd.PersistentFlags().StringVarP(&describeLoadBalancersName, "name", "", "", "The name of the load balancer")
+	describeElbCmd.PersistentFlags().StringVarP(&eo.loadBalancerName, "name", "", "", "The name of the load balancer")
 }
 
 func describeElbRun(cmd *cobra.Command, args []string) {
@@ -53,7 +49,7 @@ func describeElbRun(cmd *cobra.Command, args []string) {
 
 	input := &elbv2.DescribeLoadBalancersInput{
 		Names: []*string{
-			aws.String(describeLoadBalancersName),
+			aws.String(eo.loadBalancerName),
 		},
 	}
 

@@ -32,10 +32,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	loadBalancerArn string
-)
-
 // elbDeleteCmd represents the delete command
 var elbDeleteCmd = &cobra.Command{
 	Use:   "delete",
@@ -45,7 +41,7 @@ var elbDeleteCmd = &cobra.Command{
 
 func init() {
 	elbCmd.AddCommand(elbDeleteCmd)
-	elbDeleteCmd.PersistentFlags().StringVarP(&loadBalancerArn, "arn", "", "", "The arn of the load balancer")
+	elbDeleteCmd.PersistentFlags().StringVarP(&eo.loadBalancerArn, "arn", "", "", "The arn of the load balancer")
 
 	if err := elbDeleteCmd.MarkPersistentFlagRequired("arn"); err != nil {
 		log.Fatal(err)
@@ -57,7 +53,7 @@ func deleteElbRun(cmd *cobra.Command, args []string) {
 	svc := elbv2.New(sess)
 
 	input := &elbv2.DeleteLoadBalancerInput{
-		LoadBalancerArn: aws.String(loadBalancerArn),
+		LoadBalancerArn: aws.String(eo.loadBalancerArn),
 	}
 
 	_, err := svc.DeleteLoadBalancer(input)
@@ -79,5 +75,5 @@ func deleteElbRun(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	fmt.Printf("%s successfully deleted\n", loadBalancerArn)
+	fmt.Printf("%s successfully deleted\n", eo.loadBalancerArn)
 }

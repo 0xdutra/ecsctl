@@ -31,6 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
 package cmd
 
 import (
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -43,9 +44,9 @@ func clusterRun(cmd *cobra.Command, args []string) {
 	}
 }
 
-var (
+type clusterOpts struct {
 	clusterName string
-)
+}
 
 var clusterCmd = &cobra.Command{
 	Use:   "cluster",
@@ -53,7 +54,13 @@ var clusterCmd = &cobra.Command{
 	Run:   clusterRun,
 }
 
+var co = clusterOpts{}
+
 func init() {
 	rootCmd.AddCommand(clusterCmd)
-	clusterCmd.PersistentFlags().StringVarP(&clusterName, "cluster", "", "", "The name of the ECS cluster")
+	clusterCmd.PersistentFlags().StringVarP(&co.clusterName, "cluster", "", "", "The name of the ECS cluster")
+
+	if err := clusterCmd.MarkPersistentFlagRequired("cluster"); err != nil {
+		log.Fatal(err)
+	}
 }

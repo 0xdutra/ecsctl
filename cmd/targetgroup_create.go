@@ -39,27 +39,16 @@ var createTargetGroupCmd = &cobra.Command{
 	Run:   createTargetGroupRun,
 }
 
-var (
-	targetGroupName                string
-	targetGroupPort                int64
-	targetGroupProtocol            string
-	targetGroupVpcID               string
-	targetGroupType                string
-	targetGroupEnableHealthCheck   bool
-	targetGroupHealthCheckPath     string
-	targetGroupHealthCheckInterval int64
-)
-
 func init() {
 	targetgroupCmd.AddCommand(createTargetGroupCmd)
-	createTargetGroupCmd.PersistentFlags().StringVarP(&targetGroupName, "name", "", "", "The name of the target group")
-	createTargetGroupCmd.PersistentFlags().Int64VarP(&targetGroupPort, "port", "", 80, "The port of the target group")
-	createTargetGroupCmd.PersistentFlags().StringVarP(&targetGroupProtocol, "protocol", "", "HTTP", "The protocol of the target group")
-	createTargetGroupCmd.PersistentFlags().StringVarP(&targetGroupVpcID, "vpcid", "", "", "The vpcid of the target group")
-	createTargetGroupCmd.PersistentFlags().StringVarP(&targetGroupType, "type", "", "ip", "The type of the target group")
-	createTargetGroupCmd.PersistentFlags().BoolVarP(&targetGroupEnableHealthCheck, "healthcheck", "", true, "Enable health check in target group")
-	createTargetGroupCmd.PersistentFlags().StringVarP(&targetGroupHealthCheckPath, "healthcheck-path", "", "/", "Health check path")
-	createTargetGroupCmd.PersistentFlags().Int64VarP(&targetGroupHealthCheckInterval, "healthcheck-interval", "", 30, "Health check interval in seconds")
+	createTargetGroupCmd.PersistentFlags().StringVarP(&tgo.targetGroupName, "name", "", "", "The name of the target group")
+	createTargetGroupCmd.PersistentFlags().Int64VarP(&tgo.targetGroupPort, "port", "", 80, "The port of the target group")
+	createTargetGroupCmd.PersistentFlags().StringVarP(&tgo.targetGroupProtocol, "protocol", "", "HTTP", "The protocol of the target group")
+	createTargetGroupCmd.PersistentFlags().StringVarP(&tgo.targetGroupVpcID, "vpcid", "", "", "The vpcid of the target group")
+	createTargetGroupCmd.PersistentFlags().StringVarP(&tgo.targetGroupType, "type", "", "ip", "The type of the target group")
+	createTargetGroupCmd.PersistentFlags().BoolVarP(&tgo.targetGroupEnableHealthCheck, "healthcheck", "", true, "Enable health check in target group")
+	createTargetGroupCmd.PersistentFlags().StringVarP(&tgo.targetGroupHealthCheckPath, "healthcheck-path", "", "/", "Health check path")
+	createTargetGroupCmd.PersistentFlags().Int64VarP(&tgo.targetGroupHealthCheckInterval, "healthcheck-interval", "", 30, "Health check interval in seconds")
 
 	if err := createTargetGroupCmd.MarkPersistentFlagRequired("name"); err != nil {
 		log.Fatal(err)
@@ -75,14 +64,14 @@ func createTargetGroupRun(cmd *cobra.Command, args []string) {
 	svc := elbv2.New(sess)
 
 	input := &elbv2.CreateTargetGroupInput{
-		Name:                       aws.String(targetGroupName),
-		Port:                       aws.Int64(targetGroupPort),
-		Protocol:                   aws.String(targetGroupProtocol),
-		VpcId:                      aws.String(targetGroupVpcID),
-		TargetType:                 aws.String(targetGroupType),
-		HealthCheckEnabled:         aws.Bool(targetGroupEnableHealthCheck),
-		HealthCheckIntervalSeconds: aws.Int64(targetGroupHealthCheckInterval),
-		HealthCheckPath:            aws.String(targetGroupHealthCheckPath),
+		Name:                       aws.String(tgo.targetGroupName),
+		Port:                       aws.Int64(tgo.targetGroupPort),
+		Protocol:                   aws.String(tgo.targetGroupProtocol),
+		VpcId:                      aws.String(tgo.targetGroupVpcID),
+		TargetType:                 aws.String(tgo.targetGroupType),
+		HealthCheckEnabled:         aws.Bool(tgo.targetGroupEnableHealthCheck),
+		HealthCheckIntervalSeconds: aws.Int64(tgo.targetGroupHealthCheckInterval),
+		HealthCheckPath:            aws.String(tgo.targetGroupHealthCheckPath),
 	}
 
 	result, err := svc.CreateTargetGroup(input)

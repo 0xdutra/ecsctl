@@ -39,13 +39,9 @@ var deleteTargetGroupCmd = &cobra.Command{
 	Run:   deleteTargetGroupRun,
 }
 
-var (
-	targetGroupArn string
-)
-
 func init() {
 	targetgroupCmd.AddCommand(deleteTargetGroupCmd)
-	deleteTargetGroupCmd.PersistentFlags().StringVarP(&targetGroupArn, "arn", "", "", "The arn of the target group")
+	deleteTargetGroupCmd.PersistentFlags().StringVarP(&tgo.targetGroupArn, "arn", "", "", "The arn of the target group")
 
 	if err := deleteTargetGroupCmd.MarkPersistentFlagRequired("arn"); err != nil {
 		log.Fatal(err)
@@ -57,7 +53,7 @@ func deleteTargetGroupRun(cmd *cobra.Command, args []string) {
 	svc := elbv2.New(sess)
 
 	input := &elbv2.DeleteTargetGroupInput{
-		TargetGroupArn: aws.String(targetGroupArn),
+		TargetGroupArn: aws.String(tgo.targetGroupArn),
 	}
 
 	_, err := svc.DeleteTargetGroup(input)
@@ -75,5 +71,5 @@ func deleteTargetGroupRun(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	fmt.Printf("%s successfully deleted\n", targetGroupArn)
+	fmt.Printf("%s successfully deleted\n", tgo.targetGroupArn)
 }
