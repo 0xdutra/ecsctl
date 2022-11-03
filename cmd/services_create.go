@@ -23,60 +23,96 @@ package cmd
 
 import (
 	"ecsctl/pkg/provider"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"os"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
-	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-// createServiceCmd represents the createService command
-var createServiceCmd = &cobra.Command{
-	Use:     "create",
-	Short:   "Commands to create ECS services",
-	Run:     createServiceRun,
-	Example: "ecsctl services create --input-json examples/service_simple_example.json",
-}
-
-func init() {
-	servicesCmd.AddCommand(createServiceCmd)
-	createServiceCmd.PersistentFlags().StringVarP(&so.serviceInputJson, "input-json", "", "", "Input service with JSON format")
-
-	if err := createServiceCmd.MarkPersistentFlagRequired("input-json"); err != nil {
-		log.Fatal(err)
-	}
-}
-
-func createServiceRun(cmd *cobra.Command, args []string) {
+func createService(configName string) {
 	sess := provider.NewSession()
 	svc := ecs.New(sess)
 
-	serviceFile, err := os.Open(so.serviceInputJson)
+	viper.SetConfigName(configName)
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+
+	err := viper.ReadInConfig()
 	if err != nil {
-		log.Panic(err)
+		log.Panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 
-	defer serviceFile.Close()
+	var service ecs.CreateServiceInput
 
-	readServiceFile, err := ioutil.ReadAll(serviceFile)
-	if err != nil {
-		log.Panic(err)
+	service.Cluster = aws.String(viper.GetString("service.clusterName"))
+	service.DesiredCount = aws.Int64(viper.GetInt64("service.desiredCount"))
+	service.EnableECSManagedTags = aws.Bool(viper.GetBool("service.enableECSManagedTags"))
+	service.EnableExecuteCommand = aws.Bool(viper.GetBool("service.enableExecuteCommand"))
+	service.LaunchType = aws.String(viper.GetString("service.launchType"))
+
+	service.DeploymentConfiguration = &ecs.DeploymentConfiguration{
+		MaximumPercent:        aws.Int64(viper.GetInt64("service.deploymentConfiguration.maximumPercent")),
+		MinimumHealthyPercent: aws.Int64(viper.GetInt64("service.deploymentConfiguration.minimumPercent")),
 	}
 
-	var serviceInput ecs.CreateServiceInput
-
-	err = json.Unmarshal([]byte(readServiceFile), &serviceInput)
-	if err != nil {
-		log.Panic(err)
+	service.DeploymentController = &ecs.DeploymentController{
+		Type: aws.String(viper.GetString("service.deploymentController.type")),
 	}
 
-	result, err := svc.CreateService(&serviceInput)
+	if viper.IsSet("service.loadBalancers") {
+		service.LoadBalancers = []*ecs.LoadBalancer{
+			{
+				ContainerName:  aws.String(viper.GetString("service.loadBalancers.containerName")),
+				ContainerPort:  aws.Int64(viper.GetInt64("service.loadBalancers.containerPort")),
+				TargetGroupArn: aws.String(viper.GetString("service.loadBalancers.targetGroupArn")),
+			},
+		}
+	}
+
+	if viper.IsSet("service.networkConfiguration") {
+		service.NetworkConfiguration = &ecs.NetworkConfiguration{
+			AwsvpcConfiguration: &ecs.AwsVpcConfiguration{
+				AssignPublicIp: aws.String(viper.GetString("service.networkConfiguration.awsVpcConfiguration.assignPublicIp")),
+				SecurityGroups: aws.StringSlice(viper.GetStringSlice("service.networkConfiguration.awsVpcConfiguration.securityGroups")),
+				Subnets:        aws.StringSlice(viper.GetStringSlice("service.networkConfiguration.awsVpcConfiguration.subnets")),
+			},
+		}
+	}
+
+	service.SchedulingStrategy = aws.String(viper.GetString("service.schedulingStrategy"))
+	service.ServiceName = aws.String(viper.GetString("service.serviceName"))
+	service.TaskDefinition = aws.String(viper.GetString("service.taskDefinition"))
+
+	result, err := svc.CreateService(&service)
 	if err != nil {
 		log.Panic(err)
 	}
 
 	fmt.Println(result)
+
+	/*
+		sess := provider.NewSession()
+		svc := ecs.New(sess)
+
+		serviceFile, err := os.Open(so.serviceInputJson)
+		if err != nil {
+			log.Panic(err)
+		}
+
+		defer serviceFile.Close()
+
+		readServiceFile, err := ioutil.ReadAll(serviceFile)
+		if err != nil {
+			log.Panic(err)
+		}
+
+		var serviceInput ecs.CreateServiceInput
+
+		err = json.Unmarshal([]byte(readServiceFile), &serviceInput)
+		if err != nil {
+			log.Panic(err)
+		}
+	*/
 }

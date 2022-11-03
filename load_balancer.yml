@@ -1,0 +1,13 @@
+loadBalancers:
+  name: "httpd"
+  subnets: ["subnet-038635b487f8a5896", "subnet-0fdebd81c861ac5c2"]
+  type: "application"
+  scheme: "internet-facing"
+
+  listener:
+    defaultActions:
+      targetGroupArn: ""
+      type: "forward"
+    LoadBalancerArn: ""
+    Port: 80
+    protocol: "HTTP"

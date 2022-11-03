@@ -28,47 +28,80 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/elbv2"
-	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-// elbCreateCmd represents the create command
-var elbCreateCmd = &cobra.Command{
-	Use:   "create",
-	Short: "Commands to create Elastic Load Balancer",
-	Run:   createElbRun,
-}
-
-func init() {
-	elbCmd.AddCommand(elbCreateCmd)
-	elbCreateCmd.PersistentFlags().StringVarP(&eo.loadBalancerName, "name", "", "", "The name of the Elastic Load Balancer")
-	elbCreateCmd.PersistentFlags().StringVarP(&eo.loadBalancerScheme, "scheme", "", "internet-facing", "Specify a scheme for a Elastic Load Balancer")
-	elbCreateCmd.PersistentFlags().StringArrayVarP(&eo.loadBlanacerSubnets, "subnet", "", nil, "The list of subnets ids")
-	elbCreateCmd.PersistentFlags().StringVarP(&eo.loadBalancerType, "type", "", "application", "The type of Elastic Load Balancer")
-
-	if err := elbCreateCmd.MarkPersistentFlagRequired("name"); err != nil {
-		log.Fatal(err)
-	}
-
-	if err := elbCreateCmd.MarkPersistentFlagRequired("subnet"); err != nil {
-		log.Fatal(err)
-	}
-}
-
-func createElbRun(cmd *cobra.Command, args []string) {
+/*
+func createElbListener(configName string) {
 	sess := provider.NewSession()
 	svc := elbv2.New(sess)
 
-	input := &elbv2.CreateLoadBalancerInput{
-		Name:    aws.String(eo.loadBalancerName),
-		Subnets: aws.StringSlice(eo.loadBlanacerSubnets),
-		Type:    aws.String(eo.loadBalancerType),
-		Scheme:  aws.String(eo.loadBalancerScheme),
+	input := &elbv2.CreateListenerInput{
+		DefaultActions: []*elbv2.Action{
+			{
+				TargetGroupArn: aws.String(eo.loadBalancerListenerTgArn),
+				Type:           aws.String("forward"),
+			},
+		},
+		LoadBalancerArn: aws.String(eo.loadBalancerListenerArn),
+		Port:            aws.Int64(eo.loadBalancerListenerPort),
+		Protocol:        aws.String(eo.loadBalancerListenerProtocol),
 	}
 
-	result, err := svc.CreateLoadBalancer(input)
+	result, err := svc.CreateListener(input)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	fmt.Println(result)
+}
+*/
+
+func createElb(configName string) {
+	sess := provider.NewSession()
+	svc := elbv2.New(sess)
+
+	viper.SetConfigName(configName)
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Panic(fmt.Errorf("fatal error config file: %w", err))
+	}
+
+	var loadBalancer elbv2.CreateLoadBalancerInput
+	//var loadBalancerListener elbv2.CreateListenerInput
+
+	loadBalancer.Name = aws.String(viper.GetString("loadBalancers.name"))
+	loadBalancer.Subnets = aws.StringSlice(viper.GetStringSlice("loadBalancers.subnets"))
+	loadBalancer.Type = aws.String(viper.GetString("loadBalancers.type"))
+	loadBalancer.Scheme = aws.String(viper.GetString("loadBalancers.scheme"))
+
+	loadBalancerOutput, err := svc.CreateLoadBalancer(&loadBalancer)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(loadBalancerOutput)
+
+	/*
+		loadBalancerListener.DefaultActions = []*elbv2.Action{
+			{
+				TargetGroupArn: aws.String(loadBalancerOutput.LoadBalancers),
+				Type:           aws.String("forward"),
+			},
+		}
+
+		loadBalancerListener.LoadBalancerArn = aws.String("")
+		loadBalancerListener.Port = aws.Int64(80)
+		loadBalancerListener.Protocol = aws.String("")
+
+		loadBalancerListenerOutput, err := svc.CreateListener(&loadBalancerListener)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println(loadBalancerListenerOutput)
+	*/
 }
