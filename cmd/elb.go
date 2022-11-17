@@ -28,15 +28,8 @@ import (
 )
 
 type elbOpts struct {
-	loadBalancerArn              string
-	loadBalancerName             string
-	loadBlanacerSubnets          []string
-	loadBalancerScheme           string
-	loadBalancerType             string
-	loadBalancerListenerArn      string
-	loadBalancerListenerTgArn    string
-	loadBalancerListenerPort     int64
-	loadBalancerListenerProtocol string
+	loadBalancerArn  string
+	loadBalancerName string
 }
 
 var eo = elbOpts{}
