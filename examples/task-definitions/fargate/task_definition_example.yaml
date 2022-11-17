@@ -1,0 +1,31 @@
+taskDefinition:
+  name: httpd
+  executionRoleArn: ecsTaskExecutionRole
+  containerDefinitions:
+    dnsSearchDomain: null
+    environmentFiles: null
+    name: httpd
+    image: httpd
+    cpu: 0
+    memory: 512
+    memoryReservation: 512
+    portsMappings:
+      hostPort: 80
+      protocol: TCP
+      containerPort: 80
+    logConfiguration:
+      logDriver: awslogs
+      options:
+        awslogs-group: ecs/httpd-log-group
+        awslogs-region: us-east-1
+        awslogs-stream-prefix: httpd
+    command: null
+    #environment:
+    #  KEY: VALUE
+  memory: 512
+  taskRoleArn: ecsTaskExecutionRole
+  requiresCompatibilities:
+    - FARGATE
+  family: httpd
+  cpu: 256
+  networkMode: "awsvpc"
