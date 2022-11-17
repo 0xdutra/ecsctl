@@ -33,7 +33,6 @@ type servicesOpts struct {
 	serviceName              string
 	serviceTaskDefinition    string
 	serviceEnableForceDeploy bool
-	serviceInputJson         string
 	serviceMinCapacity       int64
 	serviceMaxCapacity       int64
 	serviceDesiredCapacity   int64

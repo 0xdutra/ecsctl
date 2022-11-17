@@ -23,57 +23,117 @@ package cmd
 
 import (
 	"ecsctl/pkg/provider"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"os"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
-	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-// createServiceCmd represents the createService command
-var createServiceCmd = &cobra.Command{
-	Use:     "create",
-	Short:   "Commands to create ECS services",
-	Run:     createServiceRun,
-	Example: "ecsctl services create --input-json examples/service_simple_example.json",
+type DeploymentConfiguration struct {
+	MaximumPercent        int64 `mapstructure:"maximumPercent" yaml:"maximumPercent"`
+	MinimumHealthyPercent int64 `mapstructure:"minimumHealthyPercent" yaml:"minimumHealthyPercent"`
 }
 
-func init() {
-	servicesCmd.AddCommand(createServiceCmd)
-	createServiceCmd.PersistentFlags().StringVarP(&so.serviceInputJson, "input-json", "", "", "Input service with JSON format")
+type DeploymentController struct {
+	Type string `mapstructure:"type" yaml:"type"`
+}
 
-	if err := createServiceCmd.MarkPersistentFlagRequired("input-json"); err != nil {
+type LoadBalancer struct {
+	ContainerName  string `mapstructure:"containerName" yaml:"containerName"`
+	ContainerPort  int64  `mapstructure:"containerPort" yaml:"containerPort"`
+	TargetGroupArn string `mapstructure:"targetGroupArn" yaml:"targetGroupArn"`
+}
+
+type AwsVpcConfiguration struct {
+	AssignPublicIp string   `mapstructure:"assignPublicIp" yaml:"assignPublicIp"`
+	SecurityGroups []string `mapstructure:"securityGroups" yaml:"securityGroups"`
+	Subnets        []string `mapstructure:"subnets" yaml:"subnets"`
+}
+
+type SvcConfig struct {
+	Cluster                 string `mapstructure:"cluster" yaml:"cluster"`
+	DesiredCount            int64  `mapstructure:"desiredCount" yaml:"desiredCount"`
+	EnableECSManagedTags    bool   `mapstructure:"enableECSManagedTags" yaml:"enableECSManagedTags"`
+	EnableExecuteCommand    bool   `mapstructure:"enableExecuteCommand" yaml:"enableExecuteCommand"`
+	LaunchType              string `mapstructure:"launchType" yaml:"launchType"`
+	SchedulingStrategy      string `mapstructure:"schedulingStrategy" yaml:"schedulingStrategy"`
+	DeploymentController    DeploymentController
+	DeploymentConfiguration DeploymentConfiguration
+	AwsVpcConfiguration     AwsVpcConfiguration
+	LoadBalancer            LoadBalancer
+	ServiceName             string `mapstructure:"serviceName" yaml:"serviceName"`
+	TaskDefinition          string `mapstructure:"taskDefinition" yaml:"taskDefinition"`
+	Test                    string `mapstructure:"test" yaml:"test"`
+}
+
+type ServiceConfig struct {
+	SvcConfig `mapstructure:"service" yaml:"service"`
+}
+
+func createService(configName string) {
+	viper.SetConfigName(configName)
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Panic(fmt.Errorf("fatal error config file: %w", err))
+	}
+
+	var ecsService ServiceConfig
+
+	err = viper.Unmarshal(&ecsService)
+	if err != nil {
 		log.Fatal(err)
 	}
-}
 
-func createServiceRun(cmd *cobra.Command, args []string) {
 	sess := provider.NewSession()
 	svc := ecs.New(sess)
 
-	serviceFile, err := os.Open(so.serviceInputJson)
-	if err != nil {
-		log.Panic(err)
+	var service ecs.CreateServiceInput
+
+	service.Cluster = aws.String(ecsService.Cluster)
+	service.DesiredCount = aws.Int64(ecsService.DesiredCount)
+	service.EnableECSManagedTags = aws.Bool(ecsService.EnableECSManagedTags)
+	service.EnableExecuteCommand = aws.Bool(ecsService.EnableExecuteCommand)
+	service.LaunchType = aws.String(ecsService.LaunchType)
+
+	if viper.IsSet("service.awsVpcConfiguration") {
+		service.NetworkConfiguration = &ecs.NetworkConfiguration{
+			AwsvpcConfiguration: &ecs.AwsVpcConfiguration{
+				AssignPublicIp: aws.String(ecsService.AwsVpcConfiguration.AssignPublicIp),
+				SecurityGroups: aws.StringSlice(ecsService.AwsVpcConfiguration.SecurityGroups),
+				Subnets:        aws.StringSlice(ecsService.AwsVpcConfiguration.Subnets),
+			},
+		}
 	}
 
-	defer serviceFile.Close()
-
-	readServiceFile, err := ioutil.ReadAll(serviceFile)
-	if err != nil {
-		log.Panic(err)
+	service.DeploymentConfiguration = &ecs.DeploymentConfiguration{
+		MaximumPercent:        aws.Int64(ecsService.DeploymentConfiguration.MaximumPercent),
+		MinimumHealthyPercent: aws.Int64(ecsService.DeploymentConfiguration.MinimumHealthyPercent),
 	}
 
-	var serviceInput ecs.CreateServiceInput
-
-	err = json.Unmarshal([]byte(readServiceFile), &serviceInput)
-	if err != nil {
-		log.Panic(err)
+	service.DeploymentController = &ecs.DeploymentController{
+		Type: aws.String(ecsService.DeploymentController.Type),
 	}
 
-	result, err := svc.CreateService(&serviceInput)
+	if viper.IsSet("service.loadBalancer") {
+		service.LoadBalancers = []*ecs.LoadBalancer{
+			{
+				ContainerName:  aws.String(ecsService.LoadBalancer.ContainerName),
+				ContainerPort:  aws.Int64(ecsService.LoadBalancer.ContainerPort),
+				TargetGroupArn: aws.String(ecsService.LoadBalancer.TargetGroupArn),
+			},
+		}
+	}
+
+	service.SchedulingStrategy = aws.String(ecsService.SchedulingStrategy)
+	service.ServiceName = aws.String(ecsService.ServiceName)
+	service.TaskDefinition = aws.String(ecsService.TaskDefinition)
+
+	result, err := svc.CreateService(&service)
 	if err != nil {
 		log.Panic(err)
 	}

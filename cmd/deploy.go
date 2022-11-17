@@ -1,16 +1,13 @@
 /*
 Copyright © 2022 Gabriel M. Dutra <0xdutra@gmail.com>
-
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
-
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
-
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,32 +19,45 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"os"
+	"log"
 
 	"github.com/spf13/cobra"
 )
 
-type elbOpts struct {
-	loadBalancerArn  string
-	loadBalancerName string
+// deployCmd represents the deploy command
+var deployCmd = &cobra.Command{
+	Use:   "deploy",
+	Short: "Commands to deploy ECS infrastructure",
+	Run:   deployRun,
 }
 
-var eo = elbOpts{}
+var configName string
+var resource string
 
-func elbRun(cmd *cobra.Command, args []string) {
-	err := cmd.Help()
-	if err != nil {
-		os.Exit(1)
+func init() {
+	rootCmd.AddCommand(deployCmd)
+	deployCmd.PersistentFlags().StringVarP(&configName, "config", "c", "", "The name of the yaml config")
+	deployCmd.PersistentFlags().StringVarP(&resource, "resource", "r", "", "The name of the resource to deploy")
+
+	if err := deployCmd.MarkPersistentFlagRequired("config"); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := deployCmd.MarkPersistentFlagRequired("resource"); err != nil {
+		log.Fatal(err)
 	}
 }
 
-// elbCmd represents the elb command
-var elbCmd = &cobra.Command{
-	Use:   "elb",
-	Short: "Commands to manage Elastic Load Balancer",
-	Run:   elbRun,
-}
+func deployRun(cmd *cobra.Command, args []string) {
 
-func init() {
-	rootCmd.AddCommand(elbCmd)
+	switch resource {
+	case "task-definition":
+		registerTaskDefinition(configName)
+	case "service":
+		createService(configName)
+	case "load-balancer":
+		createElb(configName)
+	case "target-group":
+		createTargetGroup(configName)
+	}
 }

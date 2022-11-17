@@ -1,0 +1,9 @@
+targetGroup:
+  name: httpd
+  port: 80
+  protocol: HTTP
+  vpcId: ""
+  targetType: ip
+  healthCheckEnabled: true
+  healthCheckIntervalSeconds: 30
+  healthCheckPath: /

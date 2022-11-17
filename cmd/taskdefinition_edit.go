@@ -25,7 +25,7 @@ import (
 	"ecsctl/pkg/provider"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -122,7 +122,7 @@ func editTaskdefinitionRun(cmd *cobra.Command, _ []string) {
 
 	defer readEditedTaskDefinitionFile.Close()
 
-	newTaskDefinitionJSON, err := ioutil.ReadAll(readEditedTaskDefinitionFile)
+	newTaskDefinitionJSON, err := io.ReadAll(readEditedTaskDefinitionFile)
 	if err != nil {
 		log.Panic(err)
 	}

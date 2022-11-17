@@ -1,0 +1,13 @@
+loadBalancers:
+  name: httpd
+  subnets: []
+  type: application
+  scheme: internal
+
+  listener:
+    defaultActions:
+      targetGroupArn: ""
+      type: forward
+    Port: 80
+    protocol: HTTP
+

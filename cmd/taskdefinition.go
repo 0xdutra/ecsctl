@@ -28,10 +28,9 @@ import (
 )
 
 type taskDefOpts struct {
-	editor        string
-	taskName      string
-	taskRevision  int64
-	taskJsonInput string
+	editor       string
+	taskName     string
+	taskRevision int64
 }
 
 var tdfo = taskDefOpts{}

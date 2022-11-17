@@ -1,0 +1,28 @@
+service:
+  serviceName: httpd
+  cluster: default
+  taskDefinition: httpd
+  desiredCount: 2
+  enableECSmanagedTags: false
+  enableExecuteCommand: false
+  healthCheckGracePeriodSeconds: 0
+  launchType: FARGATE
+
+  deploymentConfiguration:
+    maximumPercent: 200
+    minimumHealthyPercent: 100
+
+  deploymentController:
+    type: ECS
+
+  loadBalancer:
+    containerName: httpd
+    containerPort: 80
+    targetGroupArn: ""
+
+  awsVpcConfiguration:
+    assignPublicIp: ENABLED
+    securityGroups: []
+    subnets: []
+
+  schedulingStrategy: REPLICA

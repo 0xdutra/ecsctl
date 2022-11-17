@@ -29,49 +29,53 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/elbv2"
-	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-// createTargetGroupCmd represents the create command
-var createTargetGroupCmd = &cobra.Command{
-	Use:   "create",
-	Short: "Commands to create target groups",
-	Run:   createTargetGroupRun,
+type TargetGroupConfig struct {
+	TGConfig `mapstructure:"targetGroup" yaml:"targetGroup"`
 }
 
-func init() {
-	targetgroupCmd.AddCommand(createTargetGroupCmd)
-	createTargetGroupCmd.PersistentFlags().StringVarP(&tgo.targetGroupName, "name", "", "", "The name of the target group")
-	createTargetGroupCmd.PersistentFlags().Int64VarP(&tgo.targetGroupPort, "port", "", 80, "The port of the target group")
-	createTargetGroupCmd.PersistentFlags().StringVarP(&tgo.targetGroupProtocol, "protocol", "", "HTTP", "The protocol of the target group")
-	createTargetGroupCmd.PersistentFlags().StringVarP(&tgo.targetGroupVpcID, "vpcid", "", "", "The vpcid of the target group")
-	createTargetGroupCmd.PersistentFlags().StringVarP(&tgo.targetGroupType, "type", "", "ip", "The type of the target group")
-	createTargetGroupCmd.PersistentFlags().BoolVarP(&tgo.targetGroupEnableHealthCheck, "healthcheck", "", true, "Enable health check in target group")
-	createTargetGroupCmd.PersistentFlags().StringVarP(&tgo.targetGroupHealthCheckPath, "healthcheck-path", "", "/", "Health check path")
-	createTargetGroupCmd.PersistentFlags().Int64VarP(&tgo.targetGroupHealthCheckInterval, "healthcheck-interval", "", 30, "Health check interval in seconds")
+type TGConfig struct {
+	Name                       string `mapstructure:"name" yaml:"name"`
+	Port                       int64  `mapstructure:"port" yaml:"port"`
+	Protocol                   string `mapstructure:"protocol" yaml:"protocol"`
+	VpcId                      string `mapstructure:"vpcId" yaml:"vpcId"`
+	TargetType                 string `mapstructure:"targetType" yaml:"targetType"`
+	HealthCheckEnabled         bool   `mapstructure:"healthCheckEnabled" yaml:"healthCheckEnabled"`
+	HealthCheckIntervalSeconds int64  `mapstructure:"healthCheckIntervalSeconds" yaml:"healthCheckIntervalSeconds"`
+	HealthCheckPath            string `mapstructure:"healthCheckPath" yaml:"healthCheckPath"`
+}
 
-	if err := createTargetGroupCmd.MarkPersistentFlagRequired("name"); err != nil {
+func createTargetGroup(configName string) {
+	viper.SetConfigName(configName)
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Panic(fmt.Errorf("fatal error config file: %w", err))
+	}
+
+	var tg TargetGroupConfig
+
+	err = viper.Unmarshal(&tg)
+	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := createTargetGroupCmd.MarkPersistentFlagRequired("vpcid"); err != nil {
-		log.Fatal(err)
-	}
-}
-
-func createTargetGroupRun(cmd *cobra.Command, args []string) {
 	sess := provider.NewSession()
 	svc := elbv2.New(sess)
 
 	input := &elbv2.CreateTargetGroupInput{
-		Name:                       aws.String(tgo.targetGroupName),
-		Port:                       aws.Int64(tgo.targetGroupPort),
-		Protocol:                   aws.String(tgo.targetGroupProtocol),
-		VpcId:                      aws.String(tgo.targetGroupVpcID),
-		TargetType:                 aws.String(tgo.targetGroupType),
-		HealthCheckEnabled:         aws.Bool(tgo.targetGroupEnableHealthCheck),
-		HealthCheckIntervalSeconds: aws.Int64(tgo.targetGroupHealthCheckInterval),
-		HealthCheckPath:            aws.String(tgo.targetGroupHealthCheckPath),
+		Name:                       aws.String(tg.Name),
+		Port:                       aws.Int64(tg.Port),
+		Protocol:                   aws.String(tg.Protocol),
+		VpcId:                      aws.String(tg.VpcId),
+		TargetType:                 aws.String(tg.TargetType),
+		HealthCheckEnabled:         aws.Bool(tg.HealthCheckEnabled),
+		HealthCheckIntervalSeconds: aws.Int64(tg.HealthCheckIntervalSeconds),
+		HealthCheckPath:            aws.String(tg.HealthCheckPath),
 	}
 
 	result, err := svc.CreateTargetGroup(input)
