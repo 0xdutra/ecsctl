@@ -22,14 +22,12 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"ecsctl/pkg/colors"
 	"ecsctl/pkg/provider"
 	"fmt"
 	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
-	"github.com/enescakir/emoji"
 	"github.com/spf13/viper"
 )
 
@@ -46,17 +44,6 @@ func environmentFiles(env map[string]string) []*ecs.EnvironmentFile {
 	return []*ecs.EnvironmentFile{}
 }
 
-func logConfiguration(logDriver string, options map[string]string) *ecs.LogConfiguration {
-	if logDriver != "" {
-		return &ecs.LogConfiguration{
-			LogDriver: aws.String(logDriver),
-			Options:   aws.StringMap(options),
-		}
-	}
-
-	return &ecs.LogConfiguration{}
-}
-
 func environment(envs map[string]string) []*ecs.KeyValuePair {
 	var environment_vars []*ecs.KeyValuePair
 
@@ -70,10 +57,47 @@ func environment(envs map[string]string) []*ecs.KeyValuePair {
 	return environment_vars
 }
 
-func registerTaskDefinition(configName string) {
-	sess := provider.NewSession()
-	svc := ecs.New(sess)
+type TaskDefinitionConfig struct {
+	TaskDefConfig `mapstructure:"taskDefinition" yaml:"taskDefinition"`
+}
 
+type LogConfiguration struct {
+	LogDriver string            `mapstructure:"logDriver" yaml:"logDriver"`
+	Options   map[string]string `mapstructure:"options" yaml:"options"`
+}
+
+type PortMappings struct {
+	ContainerPort int64  `mapstructure:"containerPort" yaml:"containerPort"`
+	HostPort      int64  `mapstructure:"hostPort" yaml:"hostPort"`
+	Protocol      string `mapstructure:"protocol" yaml:"protocol"`
+}
+
+type ContainerDefinitions struct {
+	DnsSearchDomains  []string          `mapstructure:"dnsSearchDomains" yaml:"dnsSearchDomains"`
+	EnvironmentFiles  map[string]string `mapstructure:"environmentFiles" yaml:"environmentFiles"`
+	LogConfiguration  LogConfiguration  `mapstructure:"logConfiguration" yaml:"logConfiguration"`
+	Name              string            `mapstructure:"name" yaml:"name"`
+	Image             string            `mapstructure:"image" yaml:"image"`
+	Cpu               int64             `mapstructure:"cpu" yaml:"cpu"`
+	Memory            int64             `mapstructure:"memory" yaml:"memory"`
+	MemoryReservation int64             `mapstructure:"memoryReservation" yaml:"memoryReservation"`
+	Commands          []string          `mapstructure:"commands" yaml:"commands"`
+	Environment       map[string]string `mapstructure:"environment" yaml:"environment"`
+	PortsMappings     PortMappings      `mapstructure:"portsMappings" yaml:"portsMappings"`
+}
+
+type TaskDefConfig struct {
+	ExecutionRoleArn        string `mapstructure:"executionRoleArn" yaml:"executionRoleArn"`
+	ContainerDefinitions    ContainerDefinitions
+	Cpu                     string   `mapstructure:"cpu" yaml:"cpu"`
+	Memory                  string   `mapstructure:"memory" yaml:"memory"`
+	TaskRoleArn             string   `mapstructure:"taskRoleArn" yaml:"taskRoleArn"`
+	RequiresCompatibilities []string `mapstructure:"requiresCompatibilities" yaml:"requiresCompatibilities"`
+	Family                  string   `mapstructure:"family" yaml:"family"`
+	NetworkMode             string   `mapstructure:"networkMode" yaml:"networkMode"`
+}
+
+func registerTaskDefinition(configName string) {
 	viper.SetConfigName(configName)
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
@@ -83,54 +107,65 @@ func registerTaskDefinition(configName string) {
 		log.Panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 
+	var taskDefConfig TaskDefinitionConfig
+
+	err = viper.Unmarshal(&taskDefConfig)
+	if err != nil {
+		log.Panic(err)
+	}
+
 	var taskDefinition ecs.RegisterTaskDefinitionInput
 
-	taskDefinition.ExecutionRoleArn = aws.String(viper.GetString("taskDefinition.executionRoleArn"))
+	taskDefinition.ExecutionRoleArn = &taskDefConfig.ExecutionRoleArn
 
 	if viper.IsSet("taskDefinition.containerDefinitions") {
 		taskDefinition.ContainerDefinitions = []*ecs.ContainerDefinition{
 			{
-				DnsSearchDomains:  aws.StringSlice(viper.GetStringSlice("taskDefinition.containerDefinitions.dnsSearchDomain")),
-				EnvironmentFiles:  environmentFiles(viper.GetStringMapString("taskDefinition.containerDefinitions.environmentFiles")),
-				LogConfiguration:  logConfiguration(viper.GetString("taskDefinition.containerDefinitions.logConfiguration.logDriver"), viper.GetStringMapString("taskDefinition.containerDefinitions.logConfiguration.options")),
-				Name:              aws.String(viper.GetString("taskDefinition.containerDefinitions.name")),
-				Image:             aws.String(viper.GetString("taskDefinition.containerDefinitions.image")),
-				Cpu:               aws.Int64(viper.GetInt64("taskDefinition.containerDefinitions.cpu")),
-				Memory:            aws.Int64(viper.GetInt64("taskDefinition.containerDefinitions.memory")),
-				MemoryReservation: aws.Int64(viper.GetInt64("taskDefinition.containerDefinitions.memoryReservation")),
+				DnsSearchDomains: aws.StringSlice(taskDefConfig.ContainerDefinitions.DnsSearchDomains),
+				EnvironmentFiles: environmentFiles(taskDefConfig.ContainerDefinitions.EnvironmentFiles),
+
+				LogConfiguration: &ecs.LogConfiguration{
+					LogDriver: aws.String(taskDefConfig.ContainerDefinitions.LogConfiguration.LogDriver),
+					Options:   aws.StringMap(taskDefConfig.ContainerDefinitions.LogConfiguration.Options),
+				},
+
+				Name:              aws.String(taskDefConfig.ContainerDefinitions.Name),
+				Image:             aws.String(taskDefConfig.ContainerDefinitions.Image),
+				Cpu:               aws.Int64(taskDefConfig.ContainerDefinitions.Cpu),
+				Memory:            aws.Int64(taskDefConfig.ContainerDefinitions.Memory),
+				MemoryReservation: aws.Int64(taskDefConfig.ContainerDefinitions.MemoryReservation),
 				PortMappings: []*ecs.PortMapping{
 					{
-						ContainerPort: aws.Int64(viper.GetInt64("taskDefinition.containerDefinitions.portsMappings.containerPort")),
-						HostPort:      aws.Int64(viper.GetInt64("taskDefinition.containerDefinitions.portsMappings.hostPort")),
-						Protocol:      aws.String(viper.GetString("taskDefinition.containerDefinitions.portsMappings.protocol")),
+						ContainerPort: aws.Int64(taskDefConfig.ContainerDefinitions.PortsMappings.ContainerPort),
+						HostPort:      aws.Int64(taskDefConfig.ContainerDefinitions.PortsMappings.HostPort),
+						Protocol:      aws.String(taskDefConfig.ContainerDefinitions.PortsMappings.Protocol),
 					},
 				},
-				Command:     aws.StringSlice(viper.GetStringSlice("taskDefinition.containerDefinitions.command")),
-				Environment: environment(viper.GetStringMapString("taskDefinition.containerDefinitions.environment")),
+				Command:     aws.StringSlice(taskDefConfig.ContainerDefinitions.Commands),
+				Environment: environment(taskDefConfig.ContainerDefinitions.Environment),
 			},
 		}
 	}
 
-	taskDefinition.Cpu = aws.String(viper.GetString("taskDefinition.cpu"))
-	taskDefinition.Memory = aws.String(viper.GetString("taskDefinition.memory"))
-	taskDefinition.TaskRoleArn = aws.String(viper.GetString("taskDefinition.taskRoleArn"))
-	taskDefinition.RequiresCompatibilities = aws.StringSlice(viper.GetStringSlice("taskDefinition.requiresCompatibilities"))
-	taskDefinition.Family = aws.String(viper.GetString("taskDefinition.family"))
-	taskDefinition.NetworkMode = aws.String(viper.GetString("taskDefinition.networkMode"))
+	taskDefinition.Cpu = aws.String(taskDefConfig.Cpu)
+	taskDefinition.Memory = aws.String(taskDefConfig.Memory)
+	taskDefinition.TaskRoleArn = aws.String(taskDefConfig.TaskRoleArn)
+	taskDefinition.RequiresCompatibilities = aws.StringSlice(taskDefConfig.RequiresCompatibilities)
+	taskDefinition.Family = aws.String(taskDefConfig.Family)
+	taskDefinition.NetworkMode = aws.String(taskDefConfig.NetworkMode)
+
+	fmt.Println(taskDefinition)
+
+	sess := provider.NewSession()
+	svc := ecs.New(sess)
 
 	result, err := svc.RegisterTaskDefinition(&taskDefinition)
 	if err != nil {
-		fmt.Fprintf(colors.Out, "%s\n",
-			colors.Red(fmt.Sprintf("%s  Register task definition\n", emoji.CrossMark)))
-
+		fmt.Println("[-] - Task definition registration failed")
 		log.Fatal(err)
 	}
 
 	r := result.TaskDefinition
 
-	fmt.Fprintf(colors.Out, "%s\n",
-		colors.Green(fmt.Sprintf("%s  Register task definition %s with revision %d\n",
-			emoji.CheckMark,
-			viper.GetString("taskDefinition.containerDefinitions.name"),
-			*r.Revision)))
+	fmt.Printf("[+] - Register task definition with revision %d\n", *r.Revision)
 }

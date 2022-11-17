@@ -53,5 +53,7 @@ func deployRun(cmd *cobra.Command, args []string) {
 		createService(configName)
 	case "load-balancer":
 		createElb(configName)
+	case "target-group":
+		createTargetGroup(configName)
 	}
 }

@@ -28,15 +28,8 @@ import (
 )
 
 type targetGroupOpts struct {
-	targetGroupName                string
-	targetGroupArn                 string
-	targetGroupPort                int64
-	targetGroupProtocol            string
-	targetGroupVpcID               string
-	targetGroupType                string
-	targetGroupEnableHealthCheck   bool
-	targetGroupHealthCheckPath     string
-	targetGroupHealthCheckInterval int64
+	targetGroupName string
+	targetGroupArn  string
 }
 
 var tgo = targetGroupOpts{}
