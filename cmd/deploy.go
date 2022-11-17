@@ -42,6 +42,10 @@ func init() {
 	if err := deployCmd.MarkPersistentFlagRequired("config"); err != nil {
 		log.Fatal(err)
 	}
+
+	if err := deployCmd.MarkPersistentFlagRequired("resource"); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func deployRun(cmd *cobra.Command, args []string) {
