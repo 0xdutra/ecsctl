@@ -31,8 +31,10 @@ var deployCmd = &cobra.Command{
 	Run:   deployRun,
 }
 
-var configName string
-var resource string
+var (
+	configName string
+	resource   string
+)
 
 func init() {
 	rootCmd.AddCommand(deployCmd)
