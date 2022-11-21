@@ -57,6 +57,17 @@ func environment(envs map[string]string) []*ecs.KeyValuePair {
 	return environment_vars
 }
 
+func logConfiguration(logDriver string, options map[string]string) *ecs.LogConfiguration {
+	if logDriver != "" {
+		return &ecs.LogConfiguration{
+			LogDriver: aws.String(logDriver),
+			Options:   aws.StringMap(options),
+		}
+	}
+
+	return nil
+}
+
 type TaskDefinitionConfig struct {
 	TaskDefConfig `mapstructure:"taskDefinition" yaml:"taskDefinition"`
 }
@@ -124,10 +135,10 @@ func registerTaskDefinition(configName string) {
 				DnsSearchDomains: aws.StringSlice(taskDefConfig.ContainerDefinitions.DnsSearchDomains),
 				EnvironmentFiles: environmentFiles(taskDefConfig.ContainerDefinitions.EnvironmentFiles),
 
-				LogConfiguration: &ecs.LogConfiguration{
-					LogDriver: aws.String(taskDefConfig.ContainerDefinitions.LogConfiguration.LogDriver),
-					Options:   aws.StringMap(taskDefConfig.ContainerDefinitions.LogConfiguration.Options),
-				},
+				LogConfiguration: logConfiguration(
+					taskDefConfig.ContainerDefinitions.LogConfiguration.LogDriver,
+					taskDefConfig.ContainerDefinitions.LogConfiguration.Options,
+				),
 
 				Name:              aws.String(taskDefConfig.ContainerDefinitions.Name),
 				Image:             aws.String(taskDefConfig.ContainerDefinitions.Image),
