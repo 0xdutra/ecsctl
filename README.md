@@ -118,6 +118,10 @@ taskDefinition:
   networkMode: "awsvpc"
 ```
 
+```sh
+ecsctl deploy -c task_definition.yaml -r task-definition
+```
+
 ### Service
 
 *Tip: you can get TargetGroupArn using*:
@@ -157,6 +161,10 @@ service:
     subnets: [] # The subnets must be in the VPC used in the target group
 
   schedulingStrategy: REPLICA
+```
+
+```sh
+ecsctl deploy -c service.yaml -r service
 ```
 
 ### Getting service status
