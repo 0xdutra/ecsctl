@@ -43,7 +43,7 @@ func targetGroupRun(cmd *cobra.Command, args []string) {
 
 // targetgroupCmd represents the targetgroup command
 var targetgroupCmd = &cobra.Command{
-	Use:   "targetgroup",
+	Use:   "target-group",
 	Short: "Commands to manage target groups",
 	Run:   targetGroupRun,
 }
