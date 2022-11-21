@@ -21,152 +21,146 @@
 
 ```sh
 cluster         Commands to manage ECS cluster
+completion      Generate the autocompletion script for the specified shell
+deploy          Commands to deploy ECS infrastructure
 elb             Commands to manage Elastic Load Balancer
+help            Help about any command
 services        Commands to manage ECS services
-targetgroup     Commands to manage target groups
+target-group    Commands to manage target groups
 task-definition Commands to manage ECS task definitions
 ```
 
 <hr>
 
-### Cluster subcommands
+### Example
 
-```sh
-create - Create ECS cluster
-delete - Delete ECS cluster
-list   - List all ECS clusters
-```
+Creating a fargate httpd service
 
-### Cluster examples
+### Target group
 
-```sh
-ecsctl cluster create --cluster example01
-ecsctl cluster list
-ecsctl cluster delete --cluster example01
-```
+```yaml
+# target_group.yaml
 
-<hr>
-
-### Elb subcommands
-
-```sh
-create          Commands to create elb
-create-listener Commands to create elb listeners
-delete          Commands to delete elb
-describe        Commands to describe elb
-list            Commands to list elb
-```
-
-### Elb examples
-
-Creating elb
-
-```sh
-ecsctl elb create --subnet subnet-0a61bd9c135498265 --subnet subnet-0d0cdf0ea51bc8a21 --name app-01 --scheme internal
-```
-
-Creating listener
-
-```sh
-ecsctl elb create-listener --tg-arn arn:aws:elasticloadbalancing:us-east-1:833233368432:targetgroup/app-01/514717b87162a881 --elb-arn arn:aws:elasticloadbalancing:us-east-1:833233368432:loadbalancer/app/app-01/edbaebc4e9cd98fe
-```
-
-Listing elb's
-
-```sh
-ecsctl elb list
-```
-
-<hr>
-
-### Target group subcommands
-
-```sh
-create      Commands to create target groups
-delete      Commands to delete target groups
-describe    Commands to describe target groups
-list        Commands to list target groups
-```
-
-### Target group examples
-Creating target group
-
-```sh
-ecsctl targetgroup create --name app-01 --vpcid vpc-0ace6f05189d4881c
-```
-
-Deleting target group
-
-```sh
-ecsctl targetgroup delete --arn arn:aws:elasticloadbalancing:us-east-1:833233368432:targetgroup/app-01/514717b87162a881
-```
-
-<hr>
-
-### Task definition subcommands
-
-```sh
-register - Register task definition
-edit     - Edit a task definition using a text editor
-```
-
-### Task definition examples
-
-```sh
-ecsctl task-definition register --input-json examples/task_definition_example.json
+targetGroup:
+  name: httpd
+  port: 80
+  protocol: HTTP
+  vpcId: "" # your VPC id
+  targetType: ip
+  healthCheckEnabled: true
+  healthCheckIntervalSeconds: 30
+  healthCheckPath: /
 ```
 
 ```sh
-ecsctl task-definition edit --name ecsctl-apache-example --revision 1 --editor nano
+ecsctl deploy -c target_group.yaml -r target-group
 ```
 
-<hr>
+### Load Balancer
 
-### Service subcommands
+*Tip: you can get TargetGroupArn using*:
 
 ```sh
-create          - Commands to create ECS service
-describe        - Commands to describe ECS service
-list            - Commands to list service in your ECS cluster
-status          - Commands to check the status of service
-update          - Commands to update ECS service
-update-capacity - Commands to update service capacity
+ecsctl target-group describe --name httpd
 ```
 
-### Service examples
+```yaml
+# load_balancer.yaml
 
-Checking status
+loadBalancers:
+  name: httpd
+  subnets: [] # The subnets must be in the VPC used in the target group
+  type: application
+  scheme: internal
 
+  listener:
+    defaultActions:
+      targetGroupArn: "" # The ARN of the target group
+      type: forward
+    Port: 80
+    protocol: HTTP
 ```
-ecsctl services status --service <service name> --cluster <cluster name>
-```
-
-Updating service
 
 ```sh
-ecsctl services update --service <service name> --task-definition <taskdef name> --cluster <cluster name>
+ecsctl deploy -c load_balancer.yaml -r load-balancer
 ```
 
-Updating capacity
+### Task definition
 
-```sh
-ecsctl services update-capacity --min 2 --max 2 --desired 2 --service <service name> --cluster <cluster name>
+```yaml
+# task_definition.yaml
+
+taskDefinition:
+  name: httpd
+  executionRoleArn: ecsTaskExecutionRole
+  containerDefinitions:
+    name: httpd
+    image: httpd
+    cpu: 0
+    memory: 512
+    memoryReservation: 512
+    portsMappings:
+      hostPort: 80
+      protocol: TCP
+      containerPort: 80
+    logConfiguration:
+      logDriver: awslogs
+      options:
+        awslogs-group: ecs/httpd-log-group # CloudWatch log group is manually created
+        awslogs-region: us-east-1
+        awslogs-stream-prefix: httpd
+  memory: 512
+  taskRoleArn: ecsTaskExecutionRole
+  requiresCompatibilities:
+    - FARGATE
+  family: httpd
+  cpu: 256
+  networkMode: "awsvpc"
 ```
 
-Creating a service using a JSON manifest
+### Service
+
+*Tip: you can get TargetGroupArn using*:
 
 ```sh
-ecsctl services create --input-json examples/service_example.json
+ecsctl target-group describe --name httpd
 ```
 
-Listing services
+```yaml
+# service.yaml
 
-```sh
-ecsctl services list --cluster <cluster name>
+service:
+  serviceName: httpd
+  cluster: default
+  taskDefinition: httpd
+  desiredCount: 2
+  enableECSmanagedTags: false
+  enableExecuteCommand: false
+  healthCheckGracePeriodSeconds: 0
+  launchType: FARGATE
+
+  deploymentConfiguration:
+    maximumPercent: 200
+    minimumHealthyPercent: 100
+
+  deploymentController:
+    type: ECS
+
+  loadBalancer:
+    containerName: httpd
+    containerPort: 80
+    targetGroupArn: "" # The ARN of the target group
+
+  awsVpcConfiguration:
+    assignPublicIp: ENABLED
+    securityGroups: [] # The security group is optional, if is empty, the default security group is used
+    subnets: [] # The subnets must be in the VPC used in the target group
+
+  schedulingStrategy: REPLICA
 ```
 
-Describe service informations
+### Getting service status
 
 ```sh
-ecsctl services describe --service <service name> --cluster <cluster name>
+ecsctl services status --cluster default --service httpd
 ```
