@@ -32,9 +32,44 @@ task-definition Commands to manage ECS task definitions
 
 <hr>
 
-### Example
 
-Creating a fargate httpd service
+## Examples
+
+- [Services](#Services)
+	- [Status](#Service-status)
+	- [Update capacity](#Updating-capacity)
+	- [Update task definition](#Updating-task-definition)
+	- [Example - Deploying HTTP service on ECS using AWS Fargate](#Deploying-HTTP-service-on-Amazon-ECS-using-AWS-Fargate)
+
+## Services
+
+### Service status
+
+```sh
+ecsctl services status --service <service name> --cluster <cluster name>
+```
+
+### Updating capacity
+
+```sh
+ecsctl services update-capacity --service <service name> --cluster <cluster name> --min 10 --max 20 --desired 10
+```
+
+### Updating task definition
+
+*Tip*: Updating the service to a specific task definition revision, use `taskname:revision`, see a example:
+
+```sh
+ecsctl services update --service <service name> --cluster <cluster name> --task-definition <example:10> --force-new-deployment
+```
+
+To update to the latest task definition, use only the task definition name.
+
+```sh
+ecsctl services update --service <service name> --task-definition <example> --cluster <cluster name> --force-new-deployment
+```
+
+### Deploying HTTP service on Amazon ECS using AWS Fargate
 
 ### Target group
 
