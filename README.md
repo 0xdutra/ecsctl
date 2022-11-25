@@ -32,9 +32,109 @@ task-definition Commands to manage ECS task definitions
 
 <hr>
 
-### Example
 
-Creating a fargate httpd service
+## Examples
+
+- [Cluster](#Cluster)
+  - [Create](#Create)
+  - [Delete](#Delete)
+  - [List](#List)
+
+- [Load balancer](#Load-balancer)
+	- [List](#List)
+  - [Describe](#Describe)
+  - [Delete](#Delete)
+
+- [Services](#Services)
+	- [Status](#Service-status)
+	- [Update capacity](#Updating-capacity)
+	- [Update task definition](#Updating-task-definition)
+	- [Example - Deploying HTTP service on ECS using AWS Fargate](#Deploying-HTTP-service-on-Amazon-ECS-using-AWS-Fargate)
+
+- [Target group](#Target-group)
+	- [List](#list)
+	- [Describe](#Describe)
+	- [Delete](#Delete)
+
+- [Task definition](#Task-definition)
+	- [Edit](#Edit)
+
+<hr>
+
+## Cluster
+
+### Create
+
+```sh
+ecsctl cluster create --name <cluster name>
+```
+
+### Delete
+
+```sh
+ecsctl cluster delete --name <cluster name>
+```
+
+### List
+
+```sh
+ecsctl cluster list
+```
+
+<hr>
+
+## Load balancer
+
+### List
+
+```sh
+ecsctl elb list
+```
+
+### Describe
+
+```sh
+ecsctl elb describe --name <elb name>
+```
+
+### Delete
+
+```sh
+ecsctl elb delete --arn <elb arn>
+```
+
+
+<hr>
+
+## Services
+
+### Service status
+
+```sh
+ecsctl services status --service <service name> --cluster <cluster name>
+```
+
+### Updating capacity
+
+```sh
+ecsctl services update-capacity --service <service name> --cluster <cluster name> --min 10 --max 20 --desired 10
+```
+
+### Updating task definition
+
+*Tip*: Updating the service to a specific task definition revision, use `taskname:revision`, see a example:
+
+```sh
+ecsctl services update --service <service name> --cluster <cluster name> --task-definition <example:10> --force-new-deployment
+```
+
+To update to the latest task definition, use only the task definition name.
+
+```sh
+ecsctl services update --service <service name> --task-definition <example> --cluster <cluster name> --force-new-deployment
+```
+
+### Deploying HTTP service on Amazon ECS using AWS Fargate
 
 ### Target group
 
@@ -171,4 +271,36 @@ ecsctl deploy -c service.yaml -r service
 
 ```sh
 ecsctl services status --cluster default --service httpd
+```
+
+<hr>
+
+## Target group
+
+### List
+
+```sh
+ecsctl target-group list
+```
+
+#### Describe
+
+```sh
+ecsctl target-group describe --name <target group>
+```
+
+### Delete
+
+```sh
+ecsctl target-group delete --arn <target group>
+```
+
+<hr>
+
+## Task definition
+
+### Edit
+
+```sh
+ecsctl task-definition edit --name <task definition name>
 ```

@@ -57,5 +57,5 @@ var co = clusterOpts{}
 
 func init() {
 	rootCmd.AddCommand(clusterCmd)
-	clusterCmd.PersistentFlags().StringVarP(&co.clusterName, "cluster", "", "", "The name of the ECS cluster")
+	clusterCmd.PersistentFlags().StringVarP(&co.clusterName, "name", "", "", "The name of the ECS cluster")
 }
