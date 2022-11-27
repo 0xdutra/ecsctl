@@ -46,6 +46,7 @@ task-definition Commands to manage ECS task definitions
   - [Delete](#Delete)
 
 - [Services](#Services)
+  - [Events](#Service-events)
 	- [Status](#Service-status)
 	- [Update capacity](#Updating-capacity)
 	- [Update task definition](#Updating-task-definition)
@@ -107,6 +108,12 @@ ecsctl elb delete --arn <elb arn>
 <hr>
 
 ## Services
+
+### Servoce events
+
+```sh
+./ecsctl services events --cluster <cluster name> --service <service name>
+```
 
 ### Service status
 
