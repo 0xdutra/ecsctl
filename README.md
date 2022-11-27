@@ -32,6 +32,12 @@ task-definition Commands to manage ECS task definitions
 
 <hr>
 
+## Install
+
+```sh
+make
+make install
+```
 
 ## Examples
 
@@ -112,7 +118,7 @@ ecsctl elb delete --arn <elb arn>
 ### service events
 
 ```sh
-./ecsctl services events --cluster <cluster name> --service <service name>
+ecsctl services events --cluster <cluster name> --service <service name>
 ```
 
 ### Service status
