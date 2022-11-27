@@ -47,10 +47,10 @@ task-definition Commands to manage ECS task definitions
 
 - [Services](#Services)
   - [Events](#Service-events)
-	- [Status](#Service-status)
-	- [Update capacity](#Updating-capacity)
-	- [Update task definition](#Updating-task-definition)
-	- [Example - Deploying HTTP service on ECS using AWS Fargate](#Deploying-HTTP-service-on-Amazon-ECS-using-AWS-Fargate)
+  - [Status](#Service-status)
+  - [Update capacity](#Updating-capacity)
+  - [Update task definition](#Updating-task-definition)
+  - [Example - Deploying HTTP service on ECS using AWS Fargate](#Deploying-HTTP-service-on-Amazon-ECS-using-AWS-Fargate)
 
 - [Target group](#Target-group)
 	- [List](#list)
@@ -109,7 +109,7 @@ ecsctl elb delete --arn <elb arn>
 
 ## Services
 
-### Servoce events
+### service events
 
 ```sh
 ./ecsctl services events --cluster <cluster name> --service <service name>
